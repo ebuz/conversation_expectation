@@ -1,6 +1,16 @@
 // import React from 'react';
 //
 
+export const switchboardData = {
+    status: 'disconnected',
+    messages: [],
+    selfId: null,
+    serverId: null,
+    candidatePeerId: null,
+    peeringConstraints: {},
+    selfSignalData: []
+};
+
 export const mturkData = {
     workerId: '',
     hitId: '',
@@ -12,17 +22,27 @@ export const experimentalData = {
     studyName: 'CE_pilot',
     studyCondition: 'short',
     studyIdCode: '2f42167b-e18d-493c-8a66-0dc0cf3b1e85',
-    dialogueTimeExpectations: 5,
-    dialogueTimeLimit: 4,
-    preDialogueSurveyData: {},
-    preDialogueSurveyDataPartner: {},
-    recallData: {},
+    dialogueTimeExpectations: 5 * 60 * 1000, //convert min to ms
+    dialogueTimeLimit: 4 * 60 * 1000, //convert min to ms
+    preDialogueAnswersById: new Map(),
+    preDialoguePartnerAnswersById: null,
+    dialogueStatus: {
+        ready: false,
+        partnerReady: false,
+        timeKeeper: false,
+        started: false,
+        ended: false,
+        dialogueStartTime: null,
+        dialogueTime: null,
+    },
+    dialogueFileName: null,
+    recallData: '',
     surveyData: {},
-    otherData: {}
+    otherData: {},
+    debugMode: false
 };
 
 export const micData = {
-    publicId: null,
     micInput: null,
     recorder: null,
     recordingState: null,
@@ -57,7 +77,39 @@ const micCheck = {
 const preDialogue = {
     blockId: "preDialogue",
     finished: false,
-    instructions: "Please fill out this survey."
+    instructions: "Our software is currently trying to match you with a partner. Before you speak with your partner, fill out this survey about yourself. Your partner will be filling out the same questions.",
+    finishedPreDialogueQuestions: false,
+    preDialogueQuestions: [
+            {
+                questionId: 'sodaPreference',
+                questionType: 'select',
+                label: 'Do you prefer Coke, Pepsi, or Dr. Pepper?',
+                options: ['', "Coke", "Pepsi",
+                    "Dr. Pepper", "None of the above"],
+                defaultValue: ''
+            },
+            {
+                questionId: 'lastConcert',
+                questionType: 'input',
+                type: 'text',
+                label: 'What was the last concert you went to?',
+                defaultValue: ''
+            },
+            {
+                questionId: 'mturkInteraction',
+                questionType: 'input',
+                type: 'text',
+                label: 'Have you ever interacted with another MTurker?',
+                defaultValue: ''
+            },
+            {
+                questionId: 'otherLanguages',
+                questionType: 'input',
+                type: 'text',
+                label: "Do you know any languages other than English? Which ones?",
+                defaultValue: ''
+            },
+        ]
 };
 
 const dialogue = {
@@ -84,11 +136,12 @@ const submission = {
     instructions: "Please fill out this survey."
 };
 
-export const experimentBlocks = ["introduction", "consent", "micSetup", "micCheck", "preDialogue", "dialogue", "recall", "debrief", "submission"];
+export const experimentBlocks = ["introduction", "consent", "micSetup", "micCheck", "preDialogue", "dialogue", "recall", "submission"];
 
 export const blocksById = {
     "introduction": introduction, "consent": consent,
     "micSetup": micSetup, "micCheck": micCheck,
-    "preDialogue" : preDialogue, "dialogue": dialogue,
+    "preDialogue": preDialogue,
+    "dialogue": dialogue,
     "recall": recall, "debrief": debrief, "submission": submission};
 

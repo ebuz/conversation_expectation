@@ -15,15 +15,15 @@ const MicCheck = ({blockId, micData, onFinished, startRecordingAction, stopRecor
                     <p>Can't hear yourself? Check that the speakers are on and their volume is up. You can also try re-recording.</p>
                 </div>
                 <div className="Footer">
-                        <button type="button" onClick={redoRecordingAction}
-                            className="RecordingRedo-button"
-                        >
-                            I want to re-record
-                        </button>
                     <button type="button" onClick={onFinished(blockId)}
                         className="RecordingOk-button"
                     >
                         I can hear myself, let's continue
+                    </button>
+                    <button type="button" onClick={redoRecordingAction}
+                        className="RecordingRedo-button"
+                    >
+                        I want to re-record
                     </button>
                 </div>
             </div>

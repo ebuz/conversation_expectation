@@ -1,5 +1,7 @@
 import {createStore, applyMiddleware} from 'redux';
 import thunk from 'redux-thunk';
+import websocket from '@giantmachines/redux-websocket';
+import { middleware as rpcMiddleWare } from '@ebuz/redux-peer-connection';
 
 import { createLogger } from 'redux-logger';
 import { composeWithDevTools } from 'redux-devtools-extension';
@@ -14,7 +16,7 @@ export default function configureStore(initialState) {
         initialState,
         composeWithDevTools(
             mturkEnhancer,
-            applyMiddleware(thunk, createLogger()),
+            applyMiddleware(websocket, rpcMiddleWare, thunk, createLogger()),
         )
     );
 

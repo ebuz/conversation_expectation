@@ -14,7 +14,7 @@ const isInPreview = ({assignmentId, workerId, hitId, turkSubmitTo}) => {
 
 const Consent = ({instructions, blockId, consentFileURL, onFinished, inPreview}) => {
     return(
-        <div className="Introduction-box">
+        <div className="Consent-box">
             <p>Please read our <a href={consentFileURL} target="_blank" rel="noopener noreferrer">consent form</a>.</p>
             <p>{instructions}</p>
             <button type='button' onClick={onFinished(blockId)} disabled={inPreview}

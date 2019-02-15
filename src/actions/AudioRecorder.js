@@ -1,6 +1,7 @@
 const MediaRecorder = window.MediaRecorder;
+const getUserMedia = navigator.mediaDevices.getUserMedia;
 
-export { MediaRecorder };
+export { MediaRecorder, getUserMedia };
 
 export default class AudioRecorder {
     constructor(stream, onStart = null, onStop = null) {

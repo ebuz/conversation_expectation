@@ -16,17 +16,17 @@ const MicSetup = ({instructions, blockId, micData, tryMicSetup, finishBlock}) =>
     return(
         <div className="MicSetup-box">
             {message}
-            <button type='button' onClick={tryMicSetup} disabled={micData.micInput === false}
+            <button type='button' onClick={micData.micInput === false ? () => {window.location.reload(true);}: tryMicSetup}
                 className="MicSetup-button"
             >
-                Click here to activate microphone
+                    {micData.micInput === false ? 'Click to reload page' : 'Click here to activate microphone'}
             </button>
         </div>
     )
 };
 
 const mapStateToProps = (state) => {
-    return { ...state.blocksById['consent'],
+    return { ...state.blocksById['micSetup'],
         micData: state.micData
     }
 };

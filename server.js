@@ -138,7 +138,7 @@ router.post('/submitassignment', assignmentUpload.none(), saveAssignment);
 // router.use(express.static(__dirname + '/build'));
 
 router.get('/*', function (req, res) {
-    res.sentStatus(404);
+    res.sendStatus(404);
     // res.sendFile(path.join(__dirname, './build', 'index.html'));
 });
 

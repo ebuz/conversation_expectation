@@ -1,5 +1,7 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import thunk from 'redux-thunk';
+import websocket from '@giantmachines/redux-websocket';
+import { middleware as rpcMiddleWare } from '@ebuz/redux-peer-connection';
 
 import reducer from '../reducers';
 
@@ -9,6 +11,6 @@ export default function configureStore(initialState) {
     return createStore(
         reducer,
         initialState,
-        compose(mturkEnhancer, applyMiddleware(thunk))
+        compose(mturkEnhancer, applyMiddleware(websocket, rpcMiddleWare, thunk))
     );
 };
