@@ -1,3 +1,4 @@
+require('dotenv').config()
 const fs = require('fs');
 const path = require('path');
 const express = require('express');
@@ -138,11 +139,12 @@ router.post('/submitassignment', assignmentUpload.none(), saveAssignment);
 // router.use(express.static(__dirname + '/build'));
 
 router.get('/*', function (req, res) {
+    console.log('Ignoring GET request for ' + req.url + ' ' + req.path);
     res.sendStatus(404);
     // res.sendFile(path.join(__dirname, './build', 'index.html'));
 });
 
-app.use('/', router);
+app.use('/ce/', router);
 
 // const serverDBStartup = () => {
 //     commitToDb(db.pool,
@@ -162,7 +164,7 @@ app.use('/', router);
 //         });
 // };
 
-const serverPort = 6969;
+const serverPort = process.env.PORT || 3000;
 server.listen(serverPort, () => {
     // serverDBStartup();
     console.log('listening on port ' + serverPort)

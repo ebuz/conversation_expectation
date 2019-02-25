@@ -2,6 +2,7 @@
   "name": "conversation_expectation",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://studies.esteban.bz/ce",
   "proxy": "http://localhost:6969",
   "dependencies": {
     "@ebuz/redux-peer-connection": "github:ebuz/redux-peer-connection",

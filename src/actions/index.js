@@ -73,7 +73,7 @@ export const endNotificationTimer = () => {
 export const initiatePeer = (initiator, stream) => {
     return rpcActions.createPeer({
         initiator: initiator,
-        channelName: 'test',
+        channelName: 'peerData',
         stream: stream
     });
 };

@@ -77,22 +77,14 @@ const micCheck = {
 const preDialogue = {
     blockId: "preDialogue",
     finished: false,
-    instructions: "Our software is currently trying to match you with a partner. Before you speak with your partner, fill out this survey about yourself. Your partner will be filling out the same questions.",
+    instructions: "Our software is currently trying to match you with a partner. Before you speak with your partner, fill out this survey about yourself that will be shared with your partner. Your partner will be filling out the same questions.",
     finishedPreDialogueQuestions: false,
     preDialogueQuestions: [
             {
-                questionId: 'sodaPreference',
-                questionType: 'select',
-                label: 'Do you prefer Coke, Pepsi, or Dr. Pepper?',
-                options: ['', "Coke", "Pepsi",
-                    "Dr. Pepper", "None of the above"],
-                defaultValue: ''
-            },
-            {
-                questionId: 'lastConcert',
+                questionId: 'weekendEvents',
                 questionType: 'input',
                 type: 'text',
-                label: 'What was the last concert you went to?',
+                label: 'What did you do last weekend?',
                 defaultValue: ''
             },
             {
@@ -103,10 +95,25 @@ const preDialogue = {
                 defaultValue: ''
             },
             {
+                questionId: 'lastConcert',
+                questionType: 'input',
+                type: 'text',
+                label: 'What was the last concert you went to?',
+                defaultValue: ''
+            },
+            {
+                questionId: 'sodaPreference',
+                questionType: 'select',
+                label: 'Do you prefer Coke, Pepsi, or Dr. Pepper?',
+                options: ['', "Coke", "Pepsi",
+                    "Dr. Pepper", "None of the above"],
+                defaultValue: ''
+            },
+            {
                 questionId: 'otherLanguages',
                 questionType: 'input',
                 type: 'text',
-                label: "Do you know any languages other than English? Which ones?",
+                label: "Do you know any languages other than English? When did you learn them?",
                 defaultValue: ''
             },
         ]
