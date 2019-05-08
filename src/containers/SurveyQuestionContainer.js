@@ -1,15 +1,33 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { updateQuestionValue } from '../actions';
 
 const numberStringEqCheck = (v1, v2) => {
     return v1 === v2 || v1.toString() === v2 || v1 === v2.toString();
 };
 
-const SurveyQuestion = ({dataField, questionId, question, answer, handleOnChange, handleOnChangeMultiple}) => {
+const SurveyQuestion = ({questionId, question, answer, handleOnChange, handleOnChangeMultiple}) => {
     let questionDiv = <div />;
     let {questionType, label, defaultValue, ...subparts} = question;
     switch (questionType){
+        case 'checkBoxes':
+            questionDiv =
+                <div className="CheckBoxQuestion-box">
+                    <label htmlFor={questionId}>{label}</label><br />
+                        {subparts.options.map((item, index) => {
+                            return (
+                                <label key={index}>
+                                    <input type="checkbox" name={questionId}
+                                        value={item}
+                                        checked={answer ? answer.includes(item) : false}
+                                        onChange={handleOnChange}
+                                    />
+                                    {item}
+                                </label>
+                            )
+                        })
+                        }
+                </div>
+            break;
         case 'select':
             questionDiv =
                 <div className="SelectQuestion-box">
@@ -78,16 +96,6 @@ const mapStateToProps = (state, ownProps) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        handleOnChange: (event) => {
-            dispatch(
-                updateQuestionValue(ownProps.dataField, ownProps.questionId,
-                    event.target.value));
-        },
-        handleOnChangeMultiple: (event) => {
-            dispatch(
-                updateQuestionValue(ownProps.dataField, ownProps.questionId,
-                    [...event.target.options].filter(({selected}) => selected).map(({value}) => value)));
-        },
     };
 };
 export default connect(mapStateToProps, mapDispatchToProps)(SurveyQuestion);

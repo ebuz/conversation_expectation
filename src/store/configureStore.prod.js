@@ -11,6 +11,6 @@ export default function configureStore(initialState) {
     return createStore(
         reducer,
         initialState,
-        compose(mturkEnhancer, applyMiddleware(websocket, rpcMiddleWare, thunk))
+        compose(mturkEnhancer, applyMiddleware(websocket, rpcMiddleWare, thunk, createLogger()))
     );
 };

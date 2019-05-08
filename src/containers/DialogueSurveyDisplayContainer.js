@@ -28,9 +28,9 @@ const DialogueSurveyAnswerDisplay = ({preDialogueQuestions, preDialogueAnswersBy
 
 const mapStateToProps = (state, ownProps) => {
     return {
-        preDialogueQuestions: state.blocksById['preDialogue'].preDialogueQuestions,
-        preDialogueAnswersById: state.experimentalData.preDialogueAnswersById,
-        preDialoguePartnerAnswersById: state.experimentalData.preDialoguePartnerAnswersById,
+        preDialogueQuestions: state.experimentTasksById['dialogue'].dialogueTasksById['dialogueIcebreakers'].preDialogueQuestions,
+        preDialogueAnswersById: state.experimentTasksById['dialogue'].dialogueTasksById['dialogueIcebreakers'].data.answersById,
+        preDialoguePartnerAnswersById: state.experimentTasksById['dialogue'].dialogueTasksById['dialogueIcebreakers'].data.partnerAnswersById,
     };
 };
 

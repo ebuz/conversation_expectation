@@ -1,8 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { startDialogueRecorderTimer } from '../actions';
-
 const msToTime = (s) => {
     // Pad to 2 or 3 digits, default is 2
     const pad = (n, z = 2) => ('00' + n).slice(-z);
@@ -12,10 +10,6 @@ const msToTime = (s) => {
 
 class DialogueTimer extends React.Component {
     componentDidUpdate(prevProps) {
-        if(this.props.started && !prevProps.started){
-            console.log(`dialogue cued to start, I am ${this.props.timeKeeper ? '' : 'not'} time keeper`);
-            this.props.startDialogueRecorderTimer();
-        }
     }
 
     render() {
@@ -23,18 +17,14 @@ class DialogueTimer extends React.Component {
     }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
     return {
-        // ...state.experimentalData.dialogueStatus,
-        started: state.experimentalData.dialogueStatus.started,
-        dialogueTimeExpectations: state.experimentalData.dialogueTimeExpectations,
-        dialogueTimeLeft: state.experimentalData.dialogueTimeExpectations - state.experimentalData.dialogueStatus.dialogueTime
+        dialogueTimeLeft: ownProps.dialogueTimeLimit - ownProps.dialogueTime
     }
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        startDialogueRecorderTimer: () => dispatch(startDialogueRecorderTimer()),
     };
 };
 

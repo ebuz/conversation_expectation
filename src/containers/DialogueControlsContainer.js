@@ -1,60 +1,79 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { readyToDialogue, askToStartDialogue, notifyPartnerReady } from '../actions';
+import { TASK_ACTION } from '../actionTypes';
 
-// dialogueLifeCycle:
-//     not ready & partner not ready
-//     ready & partner not ready || not ready & partner ready
-//     ready & partner ready
-//     not-started
-//     in-progress
-//     ended
+import { startNotificationTimer, endNotificationTimer, readyToDialogue, partnerReadyToDialogue, actionCountDown, notReadyToDialogue, partnerNotReadyToDialogue, sendPeerAction, handleDialogueStart } from '../actions';
 
-const generateDialogueState = ({ready, partnerReady, started, ended}) => {
-    if(ended) return 'ended';
-    if(started) return 'inprogress';
-    if(ready && partnerReady) return 'readyToStart';
-    if(!ready) return 'notReady';
-    if(!partnerReady) return 'partnerNotReady';
-    return 'inital';
-}
+import { lastPeerMessage } from './PreDialogueContainer';
 
 class DialogueControls extends React.Component {
-    componentDidUpdate(prevProps) {
-        if(this.props.dialogueState !== prevProps.dialogueState && this.props.dialogueState === 'readyToStart' && prevProps.dialogueState === 'notReady'){
-            this.props.askToStartDialogue();
+    componentDidMount() {
+        if(this.props.peerData){
+            const peerData = JSON.parse(this.props.peerData);
+            if(peerData.type && peerData.type === TASK_ACTION){
+                this.props.dispatchPeerAction(peerData);
+            }
         }
     }
 
+    componentDidUpdate(prevProps) {
+        if(this.props.peerData && this.props.peerData !== prevProps.peerData){
+            const peerData = JSON.parse(this.props.peerData);
+            if(peerData.type && peerData.type === TASK_ACTION){
+                this.props.dispatchPeerAction(peerData);
+            }
+        }
+        if(this.props.dialogueStartTime === null){ //convo not started
+            if((this.props.ready && this.props.partnerReady) && !(prevProps.ready && prevProps.partnerReady)){
+                endNotificationTimer();
+                this.props.startDialogue();
+            } else if((!this.props.ready && this.props.partnerReady) && !prevProps.partnerRead){
+                startNotificationTimer(10 * 1000);
+            }
+        }
+    }
+
+    componentWillUnmount() {
+        endNotificationTimer();
+    }
+
     render() {
-        if(this.props.dialogueState === 'notReady'){
+        if(!this.props.ready){
             return <div>
-                <button onClick={this.props.readyToDialogue}>
+                <button onClick={this.props.readyAndNotify}>
                     Click when ready to start talking
                 </button>
                 </div>;
         }
-        if(this.props.dialogueState === 'partnerNotReady'){
+        if(!this.props.partnerReady){
             return <div><p>Waiting on partner to be ready. Do not leave this page!</p></div>
         }
         return <div><p>Dialogue in progress</p></div>
     }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
     return {
-        dialogueState: generateDialogueState(state.experimentalData.dialogueStatus),
+        peerData: lastPeerMessage(state.peer.data),
     }
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        askToStartDialogue: () => dispatch(askToStartDialogue()),
-        readyToDialogue: () => {
-            dispatch(readyToDialogue());
-            dispatch(notifyPartnerReady());
+        readyAndNotify: () => {
+            dispatch(ownProps.wrappedTaskAction(readyToDialogue(ownProps.id)));
+            dispatch(sendPeerAction(ownProps.wrappedTaskAction(partnerReadyToDialogue(ownProps.id))));
+            const NotReadyAction = ownProps.wrappedTaskAction(notReadyToDialogue(ownProps.id));
+            const NotPartnerReadyAction = sendPeerAction(ownProps.wrappedTaskAction(partnerNotReadyToDialogue(ownProps.id)));
+            dispatch(actionCountDown(NotReadyAction));
+            dispatch(actionCountDown(NotPartnerReadyAction));
         },
+        startDialogue: () => {
+            endNotificationTimer();
+            dispatch(handleDialogueStart(ownProps.wrappedTaskAction, ownProps.id, 15 * 1000));
+        },
+        dispatchPeerAction: action => dispatch(action),
     };
 };
 

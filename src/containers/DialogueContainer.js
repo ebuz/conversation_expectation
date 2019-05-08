@@ -1,44 +1,89 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import PartnerAudioContainer from './PartnerAudioContainer';
-import DialogueSurveyDisplayContainer from './DialogueSurveyDisplayContainer';
-import DialogueControlsContainer from './DialogueControlsContainer';
-import DialogueTimerContainer from './DialogueTimerContainer';
-import { finishBlock } from '../actions';
+import RemovePartnerContainer from './RemovePartnerContainer';
+import IceBreakerRecallContainer from './IceBreakerRecallContainer';
+import TopicsSelectContainer from './TopicsSelectContainer';
+import RecallContainer from './RecallContainer';
+import DialogueBreakContainer from './DialogueBreakContainer';
+import PreDialogueContainer from './PreDialogueContainer';
+import ConversationContainer from './ConversationContainer';
+import { finishTask, startTask, taskAction } from '../actions';
+
+const taskToContainer = new Map([
+    ['findPartner', PreDialogueContainer],
+    ['dialogueIcebreakers', PreDialogueContainer],
+    ['dialogue1', ConversationContainer],
+    ['dialogue2', null],
+    ['dialogue3', null],
+    ['potentialTopics', TopicsSelectContainer],
+    ['dialogueBreak', DialogueBreakContainer],
+    ['icebreakersRecall', IceBreakerRecallContainer],
+    ['dialogue1Recall', RecallContainer],
+    ['removePartner', RemovePartnerContainer]
+]);
 
 class Dialogue extends React.Component {
     componentDidMount() {
-    }
-
+        this.props.onStarted(this.props.id)();
+        if(this.props.dialogueTasksById[this.props.currentTask].started === false){
+            this.props.onAction(this.props.id)(startTask(this.props.currentTask))();
+        }
+    };
     componentDidUpdate(prevProps) {
-    }
-
+        if(this.props.currentTask && this.props.dialogueTasksById[this.props.currentTask].started === false){
+            this.props.onAction(this.props.id)(startTask(this.props.currentTask))();
+        }
+        if(this.props.dialogueTasks.every(task => this.props.dialogueTasksById[task].finished)){
+            if(!prevProps.dialogueTasks.every(task => prevProps.dialogueTasksById[task].finished)){
+                this.props.onFinished(this.props.id)();
+            }
+        }
+    };
     componentWillUnmount() {
-    }
+    };
 
     render() {
+        if(this.props.currentTask){
+            return(
+                <div className="Dialogue-box">
+                    <p>
+                        {this.props.currentTask} has {this.props.dialogueTasksById[this.props.currentTask].started ? 'started' : 'not started'}
+                        <br/>
+                        {this.props.currentTask} has {this.props.dialogueTasksById[this.props.currentTask].finished ? 'finished' : 'not finished'}
+                    </p>
+                    <button type='button' onClick={this.props.onAction(this.props.id)(finishTask(this.props.currentTask))}
+                        className="Consent-button"
+                    >
+                            finish task
+                    </button>
+                    {this.props.currentContainer ? <this.props.currentContainer dispatchAction={this.props.onAction(this.props.id)} wrappedTaskAction={this.props.wrapTaskAction(this.props.id)} {...this.props.dialogueTasksById[this.props.currentTask]}/>: null}
+                </div>
+            )
+        }
         return(
             <div className="Dialogue-box">
-                <p>{this.props.instructions}</p>
-                <DialogueSurveyDisplayContainer />
-                <DialogueTimerContainer />
-                <DialogueControlsContainer />
-                <PartnerAudioContainer />
+                <p>
+                    no tasks left
+                </p>
             </div>
-        );
+        )
     }
 }
 
 const mapStateToProps = (state) => {
-    return { ...state.blocksById['dialogue'],
-        dialogueStatus: state.experimentalData.dialogueStatus,
+    return { ...state.experimentTasksById['dialogue'],
+        currentTask: state.experimentTasksById['dialogue'].dialogueTasks.find(block => state.experimentTasksById['dialogue'].dialogueTasksById[block].finished === false),
+        currentContainer: taskToContainer.get(state.experimentTasksById['dialogue'].dialogueTasks.find(block => state.experimentTasksById['dialogue'].dialogueTasksById[block].finished === false)),
     }
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        onFinished: (blockId) => () => dispatch(finishBlock(blockId)),
+        onFinished: id => () => dispatch(finishTask(id)),
+        onStarted: id => () => dispatch(startTask(id)),
+        wrapTaskAction: id => action => taskAction(id, action),
+        onAction: id => action => () => dispatch(taskAction(id, action))
     };
 };
 

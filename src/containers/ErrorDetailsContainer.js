@@ -11,7 +11,10 @@ const ErrorDetails = ({studyIdCode}) => {
 };
 
 const mapStateToProps = (state) => {
-    return { ...state.experimentalData }
+    return {
+        ...state.experimentalData,
+        studyIdCode: state.experimentalTasksById['dialogue'].studyIdCode
+    }
 };
 
 export default connect(mapStateToProps)(ErrorDetails);

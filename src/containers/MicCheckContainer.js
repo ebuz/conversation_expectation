@@ -1,9 +1,9 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-import { recordMicTest, stopRecording, gotMicTest, finishBlock } from '../actions';
+import { recordMicTest, stopRecording, gotMicTest, finishTask } from '../actions';
 
-const MicCheck = ({blockId, micData, onFinished, startRecordingAction, stopRecordingAction, redoRecordingAction}) => {
+const MicCheck = ({id, micData, onFinished, startRecordingAction, stopRecordingAction, redoRecordingAction}) => {
     if(micData.micTestFile){
         return(
             <div className="MicCheck-box">
@@ -15,15 +15,15 @@ const MicCheck = ({blockId, micData, onFinished, startRecordingAction, stopRecor
                     <p>Can't hear yourself? Check that the speakers are on and their volume is up. You can also try re-recording.</p>
                 </div>
                 <div className="Footer">
-                    <button type="button" onClick={onFinished(blockId)}
-                        className="RecordingOk-button"
-                    >
-                        I can hear myself, let's continue
-                    </button>
                     <button type="button" onClick={redoRecordingAction}
                         className="RecordingRedo-button"
                     >
                         I want to re-record
+                    </button>
+                    <button type="button" onClick={onFinished(id)}
+                        className="RecordingOk-button"
+                    >
+                        I can hear myself, let's continue
                     </button>
                 </div>
             </div>
@@ -32,7 +32,7 @@ const MicCheck = ({blockId, micData, onFinished, startRecordingAction, stopRecor
         return(
             <div className="MicCheck-box">
                 <div className="Header">
-                    <p>Let's test your microphone. This both checks to make sure it records, that you can hear how you sound, and that your recordings can be saved by our software.</p>
+                    <p>Let's test your microphone. We need to make sure the webpage can successfully record you and that you can hear sound.</p>
                     <p>Press the button below to start recording and read the passage that appears below.
                     </p>
                 </div>
@@ -48,7 +48,7 @@ const MicCheck = ({blockId, micData, onFinished, startRecordingAction, stopRecor
                         style={{visibility: micData.recordingState === 'inactive' ? 'hidden' : 'visible'}}
                     >
                             <br />
-                            <p>Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it, "and what is the use of a book," thought Alice "without pictures or conversations?"</p>
+                            <p style={{color:'blue'}}>Alice was beginning to get very tired of sitting by her sister on the bank, and of having nothing to do: once or twice she had peeped into the book her sister was reading, but it had no pictures or conversations in it, "and what is the use of a book," thought Alice "without pictures or conversations?"</p>
                         </div>
                     </div>
             </div>
@@ -57,14 +57,14 @@ const MicCheck = ({blockId, micData, onFinished, startRecordingAction, stopRecor
 }
 
 const mapStateToProps = (state) => {
-    return { ...state.blocksById['micCheck'],
+    return { ...state.experimentTasksById['micCheck'],
         micData: state.micData
     }
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        onFinished: (blockId) => () => dispatch(finishBlock(blockId)),
+        onFinished: id => { return () => { dispatch(finishTask(id)) } },
         startRecordingAction: () => {
             dispatch(recordMicTest());
         },

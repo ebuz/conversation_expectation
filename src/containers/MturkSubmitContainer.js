@@ -3,11 +3,12 @@ import { connect } from 'react-redux';
 import { mapToJSON } from '../actions';
 
 const MturkSubmit = ({turkSubmitTo, assignmentId, experimentalData}) => {
+    const turkSubmitToURL = new URL('mturk/externalSubmit', turkSubmitTo);
     return (
         <div className="MturkSubmit-box">
             <p>Thank you for participating in this study, your conversation will directly contribute to our understanding of human interaction. If after the study you have any questions about the study or our findings, do not hesitate to contact us.</p>
             <p>We know that MTurkers like to share their experiences with other MTurkers about the HITs and requesters they have work with. If you plan to share your experience, we request that you not divulge too many details about this study. We want to better understand how people converse based on their expectations about the conversation and their partners. Sharing too many details about our studies with others who may participate in the future may affect the expectations they have in ways that would influence the usefulness of the data we collect. Thank you for your understanding.</p>
-            <form action={turkSubmitTo} method='post'>
+            <form action={turkSubmitToURL} method='post'>
                     <input type='hidden' id='assignmentId' name='assignmentId' value={assignmentId} />
                     <input type='hidden' id='data' name='data' value={JSON.stringify(experimentalData)} />
                     <label htmlFor='comment'>
@@ -26,17 +27,10 @@ const MturkSubmit = ({turkSubmitTo, assignmentId, experimentalData}) => {
 
 
 
-const extractData = ({studyName, studyCondition, studyIdCode,
-    dialogueTimeExpectations, dialogueTimeLimit, preDialogueAnswersById,
-    preDialoguePartnerAnswersById, dialogueStatus, dialogueFileName, recallData,
-    surveyData, otherData}) => ({
-        studyName, studyCondition, studyIdCode,
-        dialogueTimeExpectations, dialogueTimeLimit,
-        preDialogueAnswersById: mapToJSON(preDialogueAnswersById),
-        preDialoguePartnerAnswersById: mapToJSON(preDialoguePartnerAnswersById),
-        dialogueFileName, recallData, surveyData,
-        otherData
-});
+const extractDialogueData = dialogue => {
+    //convert maps to json-able things
+    return dialogue;
+};
 
 const mapStateToProps = (state) => {
     return {
@@ -44,9 +38,10 @@ const mapStateToProps = (state) => {
         assignmentId: state.mturkData.assignmentId,
         experimentalData: {
             ...state.mturkData,
+            ...state.experimentalData,
             selfId: state.switchboardData.selfId,
             peerId: state.switchboardData.candidatePeerId,
-            ...extractData(state.experimentalData),
+            dialogueData: extractDialogueData(state.experimentTasksById['dialogue']),
         }
     }
 };

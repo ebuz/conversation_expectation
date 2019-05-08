@@ -2,14 +2,14 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 class PartnerAudio extends React.Component {
-    componentDidUpdate(prevProps) {
-        if(this.props.dialogueStarted && !prevProps.dialogueStarted){
+    componentDidMount() {
+        if(this.props.peerStream){
             this.audioElement.srcObject = this.props.peerStream;
         }
-        if(this.props.dialogueEnded){
-            this.audioElement.srcObject = null;
-        }
-    }
+    };
+    componentDidUpdate(prevProps) {
+        this.audioElement.srcObject = this.props.peerStream;
+    };
     render() {
         const audioElement = <audio
             autoPlay
@@ -28,8 +28,6 @@ class PartnerAudio extends React.Component {
 const mapStateToProps = (state) => {
     return {
         peerStream: state.peer.stream || null,
-        dialogueStarted: state.experimentalData.dialogueStatus.started,
-        dialogueEnded: state.experimentalData.dialogueStatus.ended,
         debugMode: state.experimentalData.debugMode,
     }
 };

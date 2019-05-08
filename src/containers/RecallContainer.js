@@ -3,50 +3,90 @@ import { connect } from 'react-redux';
 
 import throttle from 'lodash.throttle';
 
-import { finishBlock, recallData } from '../actions';
+import { finishTask, recallData } from '../actions';
 
 const throttleValidityChecker = throttle((recallData) => {
     if(recallData === null || recallData === '') return false;
     return true;
 }, 1000, {leading: true, trailing: true});
 
-const Recall = ({instructions, recallData, recallDataValid, handleOnChange, onFinish}) => {
-    return (
-        <div className="Recall-box">
-            <div className="RecallInstructions-box">
-                <p>We have intentionally cut short your conversation. We apologize if that was unexpected but we want to understand the dynamics of your conversation given how much time you believe it will last.</p>
-                <p>Now that the conversation is over, please transcribe it in the box below to the best of your ability. Try to write out what you and your partner said as close as possible to how you remember it. Start each line with who is speaking, using "me:" and "them:" to denote who is talking. Do not write a summary, we want as close to a word-for-word transcript as you can recall. Here is an example:</p>
-                <blockquote>
-                    <p>me: Well I prefer to drink water though sometimes the tap water doesn't taste very good</p>
-                    <p>them: I know what you mean, mine doesn't taste very good so I use one of those filters</p>
-                    <p>me: Oh I should buy one too</p>
-                    <p>[...]</p>
-                </blockquote>
-            </div>
-            <p>Provide your transcript:</p>
-            <textarea wrap="soft" cols={60} rows={6} value={recallData} onChange={handleOnChange} />
-            <br />
-            <button type='button' onClick={onFinish} disabled={!recallDataValid}
-                className="Recall-button"
-            >
-                {recallDataValid ? 'Finished with recall' : 'Please type what you remember'}
-            </button>
+const recallTimeMinimum = 2 * 60; //two minutes
+
+class Recall extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            totalTimer: setTimeout(() => {
+                this.timeUp();
+            }, recallTimeMinimum * 1000),
+            tickTimer: setInterval(() => {
+                this.tick();
+            }, 1000),
+            time: recallTimeMinimum
+        };
+    }
+    tick(){
+        this.setState({ ...this.state,
+            time: this.state.time - 1
+        });
+    }
+    timeUp(){
+        clearTimeout(this.state.tickTimer);
+        this.setState({ ...this.state,
+            time: - 10
+        });
+    }
+    componentDidMount() {
+    };
+    componentDidUpdate(prevProps) {
+    };
+    componentWillUnmount() {
+        clearTimeout(this.state.totalTimer);
+        this.timeUp();
+    };
+
+    render() {
+        const disableButton = this.state.time > 0 || !this.props.recallDataValid;
+        let buttonMsg = 'Save your transcript and continue';
+        if(this.state.time > 0){
+            buttonMsg = `Please continue transcribing for ${this.state.time} more seconds`;
+        } else if(this.props.recallDataValid){
+            buttonMsg = 'Please transcribe what you recall';
+        }
+        return(
+            <div className="Recall-box">
+                <div className="RecallInstructions-box">
+                    <p>Now that the conversation is over, we would like you to spend at least the next two minutes transcribing the conversation. Try to write out what you and your partner said as close as possible to how you remember it. Start each line with who is speaking, using "me:" and "them:" to denote who is talking. Do not write a summary, we want as close to a word-for-word transcript as you can recal. Here is an example:</p>
+                    <blockquote>
+                        <p>me: Well I prefer to drink water though sometimes the tap water doesn't taste very good</p>
+                        <p>them: I know what you mean, mine doesn't taste very good so I use one of those filters</p>
+                        <p>me: Oh I should buy one too</p>
+                        <p>[...]</p>
+                    </blockquote>
+                </div>
+                <p>Provide your transcript here:</p>
+                <textarea wrap="soft" cols={60} rows={6} value={this.props.data.transcript} onChange={this.props.handleOnChange} />
+                <br />
+                <button type='button' onClick={this.props.onFinished} disabled={disableButton}
+                    className="Recall-button"
+                >
+                    {buttonMsg}
+                </button>
         </div>
-    );
+        )
+    }
 }
 
-const mapStateToProps = (state) => {
+const mapStateToProps = (state, ownProps) => {
     return {
-        instructions: state.blocksById['recall'].instructions,
-        recallData: state.experimentalData.recallData,
-        recallDataValid: throttleValidityChecker(state.experimentalData.recallData)
+        recallDataValid: throttleValidityChecker(ownProps.data.transcript),
+        onFinished: ownProps.dispatchAction(finishTask(ownProps.id)),
+        handleOnChange: (event) => ownProps.dispatchAction(recallData(ownProps.id, event.target.value))(),
     }
 };
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        handleOnChange: (event) => dispatch(recallData(event.target.value)),
-        onFinish: () => dispatch(finishBlock('recall')),
     };
 };
 

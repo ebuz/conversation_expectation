@@ -1,8 +1,11 @@
 import AudioRecorder from './AudioRecorder';
 import uuid from 'uuid/v3';
 import * as types from '../actionTypes';
-
 import { actions as rpcActions } from '@ebuz/redux-peer-connection';
+
+import { connectToSwitchboard, destroyPeer } from './switchboardPeering';
+
+export { connectToSwitchboard, requestPeer, candidatePeer, peering, sendSignal, acceptSignal, initiatePeer, peered, peeringFailed, initiateDialogue, partnerPredialogueAnswers, shareAnswers } from './switchboardPeering';
 
 export { MediaRecorder, getUserMedia } from './AudioRecorder';
 
@@ -14,42 +17,60 @@ export const continueNotificationTimer = () => (dispatch, getState) => {
 let dialogueTimer = {
     totalTimer: null,
     tickTimer: null,
-    time: 0
+    startTime: null,
+    currentTime: null
 };
 
-export const endDialogue = () => ({
-    type: types.END_DIALOGUE,
+export const actionCountDown = (action, waitTime = 10 * 1000) => (dispatch, getState) => {
+    setTimeout(() => {
+        dispatch(action);
+    }, waitTime);
+};
+
+export const endDialogue = id => ({
+    type: types.END_DIALOGUE, id
 });
 
-export const dialogueStartTime = (time) => ({
+export const dialogueStartTime = (id, time) => ({
     type: types.DIALOGUE_START_TIME,
+    id,
     time
 });
 
-export const dialogueTime = (time) => ({
+export const dialogueTime = (id, time) => ({
     type: types.DIALOGUE_TIME,
-    time
+    time, id
 });
 
-const destroyPeer = () => {
-    return rpcActions.destroyPeer();
-};
+const dialogueFileName = (id, name) => ({
+    type: types.DIALOGUE_FILE_NAME,
+    name
+});
 
-
-export const startDialogueRecorderTimer = () => (dispatch, getState) => {
-    dispatch(dialogueStartTime(Date.now()));
-    dispatch(recordDialogue());
-    dialogueTimer.totalTimer = setTimeout(() => {
-        clearTimeout(dialogueTimer.tickTimer);
-        dispatch(stopRecording());
-        dispatch(endDialogue());
-        dispatch(finishBlock('dialogue'));
-        dispatch(destroyPeer());
-    }, getState().experimentalData.dialogueTimeLimit);
-    dialogueTimer.tickTimer = setInterval(() => {
-        dispatch(dialogueTime(Date.now() - getState().experimentalData.dialogueStatus.dialogueStartTime));
-    }, 1000);
-};
+export const handleDialogueStart = (taskWrapper, id, dialogueTimeLimit) =>
+    (dispatch, getState) => {
+        dialogueTimer.startTime = Date.now();
+        dialogueTimer.currentTime = 0;
+        dispatch(taskWrapper(dialogueStartTime(id, dialogueTimer.startTime)));
+        const fileName = `${id}_${Date.now()}.` + (getState().micData.recorder.recorderOptions.mimeType.startsWith('audio/webm') ? 'webm' : 'ogg');
+        dispatch(taskWrapper(dialogueFileName(id, fileName)));
+        dispatch(recordDialogue(fileName));
+        dialogueTimer.totalTimer = setTimeout(() => {
+            dialogueTimer.startTime = null;
+            dialogueTimer.currentTime = null;
+            clearTimeout(dialogueTimer.tickTimer);
+            dialogueTimer.tickTimer = null;
+            dispatch(taskWrapper(endDialogue(id)));
+            dispatch(stopRecording());
+            // dispatch(uploadRecording());
+            // dispatch(saveDialogueFileName());
+            dispatch(taskWrapper(finishTask(id)));
+        }, dialogueTimeLimit);
+        dialogueTimer.tickTimer = setInterval(() => {
+            dialogueTimer.currentTime = Date.now() - dialogueTimer.startTime;
+            dispatch(taskWrapper(dialogueTime(id, dialogueTimer.currentTime)));
+        }, 1000);
+}
 
 let notificationTimer = null;
 let notificationSound = null;
@@ -70,28 +91,6 @@ export const endNotificationTimer = () => {
     }
 };
 
-export const initiatePeer = (initiator, stream) => {
-    return rpcActions.createPeer({
-        initiator: initiator,
-        channelName: 'peerData',
-        stream: stream
-    });
-};
-
-export const candidatePeerId = (id) => ({
-        type: types.CANDIDATE_PEERID,
-        candidatePeerId: id
-});
-
-export const sendSignal = (signal, peerId) => ({
-    type: types.WEBSOCKET_SEND,
-    payload: {
-        type: types.relaySignalToPeer,
-        receivingPeer: peerId,
-        signal: signal
-    }
-});
-
 export const mapToJSON = (map) => {
     if(map instanceof Map) return JSON.stringify([...map]);
     return null;
@@ -104,72 +103,80 @@ export const sharePreDialogueSurvey = (answers) => {
     }));
 };
 
-export const acceptSignal = (signal) => { return rpcActions.acceptSignal(signal); };
 
-export const askServerForPeer = () => (dispatch, getState) => {
-    dispatch({
-        type: types.WEBSOCKET_SEND,
-        payload: {
-            type: types.setSelfId,
-            selfId: getState().switchboardData.selfId
-        }
-    });
-    dispatch({
-        type: types.WEBSOCKET_SEND,
-        payload: {
-            type: types.requestPeer,
-            peeringConstraints: getState().switchboardData.peeringConstraints
-        }
-    });
-};
 
-export const notifyServerPeering = (selfId, peerId) => ({
-    type: types.WEBSOCKET_SEND,
-    payload: {
-        type: types.peerFound,
-        selfId,
-        peerId
-    }
+
+export const partnerReadyToDialogue = id => ({
+    type: types.PARTNER_READY_FOR_DIALOGUE,
+    id
 });
 
-export const notifyPartnerReady = () => {
-    return rpcActions.sendData(JSON.stringify({
-        type: types.PARTNER_READY_FOR_DIALOGUE,
-    }));
-};
+export const partnerNotReadyToDialogue = id => ({
+    type: types.PARTNER_NOT_READY_FOR_DIALOGUE,
+    id
+});
 
+export const notReadyToDialogue = id => ({
+    type: types.NOT_READY_FOR_DIALOGUE,
+    id
+});
 
-export const readyToDialogue = () => ({
+export const readyToDialogue = id => ({
     type: types.READY_FOR_DIALOGUE,
+    id
 });
 
-export const askToStartDialogue = () => ({
-    type: types.WEBSOCKET_SEND,
-    payload: {
-        type: types.initiateDialogue
-    }
-});
 
-export const updateQuestionValue = (dataField, questionId, value) => ({
+export const sendPeerAction = action => {
+    return rpcActions.sendData(JSON.stringify(action));
+}
+
+export const updateQuestionValue = (id, questionId, value) => ({
     type: types.QUESTION_ANSWER,
-    dataField: dataField,
+    id: id,
     questionId: questionId,
     value: value
 });
 
-export const recallData = (recallData) => ({
+export const recallData = (id, recallData) => ({
     type: types.RECALL_DATA,
+    id,
     recallData,
 });
 
-export const completePreDialogueSurvey = () => ({
-    type: types.COMPLETE_PREDIALOGUE_SURVEY
+export const completePreDialogueSurvey = (id) => ({
+    type: types.COMPLETE_PREDIALOGUE_SURVEY,
+    id
 });
 
-export const finishBlock = (blockId) => ({
-    type: types.FINISHED_BLOCK,
-    blockId: blockId
+export const restartTask = (id) => ({
+    type: types.RESTART_TASK,
+    id: id
 });
+
+export const finishTask = (id) => ({
+    type: types.FINISHED_TASK,
+    id: id
+});
+
+export const startTask = (id) => ({
+    type: types.STARTED_TASK,
+    id: id
+});
+
+export const taskAction = (id, action) => ({
+    type: types.TASK_ACTION,
+    id: id,
+    action: action
+});
+
+export const removePartner = () => (dispatch, getState) => {
+    if(getState().peer.isInitialized){
+        dispatch(destroyPeer());
+    }
+    dispatch(taskAction('dialogue', finishTask('removePartner')))
+};
+
 
 const genSelfId = (id, namespace) => ({
             type: types.SELFID,
@@ -203,8 +210,8 @@ const gotMic = (micInput, data = {}) =>
             micInput: micInput
         });
         dispatch(gotRecorder(micInput));
-        dispatch(genSelfId(getState().mturkData.workerId, getState().experimentalData.studyIdCode));
-        dispatch(finishBlock('micSetup'));
+        dispatch(genSelfId(getState().mturkData.workerId, getState().experimentTasksById['dialogue'].studyIdCode));
+        dispatch(finishTask('micSetup'));
     };
 
 const micError = (data = {}) => ({
@@ -229,33 +236,21 @@ const getMic = () => (dispatch, getState) => {
             dispatch(gotMic(stream));
         })
         .catch((err) => {
-            dispatch(micError())
+            console.log(err);
+            dispatch(micError());
         });
 };
 
-const connectToSwitchboard = () => (dispatch, getState) => {
-    dispatch({
-        type: types.WEBSOCKET_CONNECT,
-        payload: {
-            url: 'wss://switchboard.esteban.bz/' + getState().experimentalData.studyIdCode
-        }
-    })
-};
 
 export const setupMic = () => (dispatch, getState) => {
     dispatch(gotAudioContext(new AudioContext()));
     dispatch(getMic());
-    dispatch(connectToSwitchboard());
+    dispatch(connectToSwitchboard('wss://switchboard.esteban.bz/' + getState().experimentTasksById['dialogue'].studyIdCode));
 };
 
 export const gotMicTest = (micTestFile) => ({
     type: types.MIC_TEST_FILE,
     micTestFile: micTestFile
-});
-
-const dialogueFileName = (dialogueFileName) => ({
-    type: types.DIALOGUE_FILE_NAME,
-    dialogueFileName
 });
 
 export const stopRecording = () =>
@@ -279,12 +274,11 @@ const uploadRecording = (blob, id, filename, postAction) =>
         });
     };
 
-const recordDialogue = () =>
+const recordDialogue = (fileName) =>
     (dispatch, getState) => {
         const state = getState();
-        const fileName = `dialogue_recording_${Date.now()}.` + (state.micData.recorder.recorderOptions.mimeType.startsWith('audio/webm') ? 'webm' : 'ogg');
         state.micData.recorder.record().then((blob) => {
-            dispatch(uploadRecording(blob, state.switchboardData.selfId, fileName, dialogueFileName(fileName)));
+            dispatch(uploadRecording(blob, state.switchboardData.selfId, fileName));
         });
         dispatch(recordingState('recording'));
 };
@@ -312,50 +306,5 @@ export const recordMicTest = (data = {}) =>
             dispatch(uploadTestRecording(blob, state.switchboardData.selfId, micTestFile));
         });
         dispatch(recordingState('recording'));
-};
-
-export const skipToBlock = (blockId) =>
-    (dispatch, getState) => {
-        switch(blockId){
-            case 'submission':
-            case 'debrief':
-                dispatch(finishBlock('recall'));
-                dispatch(finishBlock('dialogue'));
-                dispatch(finishBlock('preDialogue'));
-                dispatch(finishBlock('micCheck'));
-                dispatch(finishBlock('micSetup'));
-                dispatch(finishBlock('consent'));
-                dispatch(finishBlock('introduction'));
-                break;
-            case 'recall':
-                dispatch(finishBlock('dialogue'));
-                dispatch(finishBlock('preDialogue'));
-                dispatch(finishBlock('micCheck'));
-                dispatch(finishBlock('micSetup'));
-                dispatch(finishBlock('consent'));
-                dispatch(finishBlock('introduction'));
-                break;
-            //it's not really possible to skip to the dialogue given the requirements needed for it to work
-            // case 'dialogue':
-            case 'preDialogue':
-                dispatch(finishBlock('micCheck'));
-                dispatch(setupMic());
-                dispatch(finishBlock('consent'));
-                dispatch(finishBlock('introduction'));
-                break;
-            case 'micCheck':
-                dispatch(setupMic());
-                dispatch(finishBlock('consent'));
-                dispatch(finishBlock('introduction'));
-                break;
-            case 'micSetup':
-                dispatch(finishBlock('consent'));
-                dispatch(finishBlock('introduction'));
-                break;
-            case 'consent':
-                dispatch(finishBlock('introduction'));
-                break;
-            default:
-        }
 };
 
