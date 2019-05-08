@@ -16,7 +16,7 @@ const Introduction = ({instructions, id, onFinished}) => {
     }
     return(
         <div className="Introduction-box">
-            <p>{instructions}</p>
+            {instructions}
             <button type='button' onClick={onFinished(id)}
                 className="Instructions-button"
             >

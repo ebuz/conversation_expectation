@@ -50,7 +50,7 @@ class Recall extends React.Component {
         let buttonMsg = 'Save your transcript and continue';
         if(this.state.time > 0){
             buttonMsg = `Please continue transcribing for ${this.state.time} more seconds`;
-        } else if(this.props.recallDataValid){
+        } else if(!this.props.recallDataValid){
             buttonMsg = 'Please transcribe what you recall';
         }
         return(

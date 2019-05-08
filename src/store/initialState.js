@@ -1,10 +1,24 @@
 import React from 'react';
 
+const shuffleList = list => {
+    let currentIndex = list.length;
+    let temporaryValue = null;
+    let randomIndex = null;
+    while (0 !== currentIndex){
+        randomIndex = Math.floor(Math.random() * currentIndex);
+        currentIndex -= 1;
+        temporaryValue = list[currentIndex];
+        list[currentIndex] = list[randomIndex];
+        list[randomIndex] = temporaryValue;
+    }
+    return list;
+}
+
 export const experimentalData = {
     studyName: 'CE_pilot',
     dialogueCondition: 'longConversation',
     data: {},
-    debugMode: true
+    debugMode: process.env.NODE_ENV !== 'production'
 };
 
 export const switchboardData = {
@@ -76,6 +90,7 @@ const submission = {
 const dialogue1 = {
     ...experimentTasksFrame,
     id: 'dialogue1',
+    instructions: "When both you and your partner hit the ready botton the conversation will begin and you will hear each other.",
     dialogueTimeLimit: 5 * 60 * 1000, //convert min to ms
     ready: false,
     partnerReady: false,
@@ -93,7 +108,7 @@ const potentialTopics = {
         questionId: 'topicsQuestion',
         questionType: 'checkBoxes',
         label: 'Which of these topics would you consider talking about with your partner? Your answers will not be shared with them.',
-        options: ['sports', 'family', 'religion', 'money'],
+        options: shuffleList(['TV shows', 'Music', 'Vacation plans', 'Book', 'Hobbies', 'Work', 'Health', 'Pets', 'Children', 'Religion', 'Government', 'Money']),
         defaultValue: []
     },
     data: {answersById: new Map()},
@@ -103,24 +118,12 @@ const dialogueIcebreakers = {
     ...experimentTasksFrame,
     id: 'dialogueIcebreakers',
     instructions: "Our software is currently trying to match you with a partner. Before you speak with your partner, fill out this survey about yourself that will be shared with your partner. Your partner will be filling out the same questions.",
-    finishedQuestions: true,
+    finishedQuestions: false,
     data: {
-        answersById: new Map([
-            ['weekendEvents', 'f'],
-            ['mturkInteraction', 'n'],
-            ['lastConcert', 'l'],
-            ['sodaPreference', 'Coke'],
-            ['otherLanguages', 'r'],
-        ]),
-        partnerAnswersById: new Map([
-            ['weekendEvents', 'f'],
-            ['mturkInteraction', 'n'],
-            ['lastConcert', 'l'],
-            ['sodaPreference', 'Coke'],
-            ['otherLanguages', 'r'],
-        ]),
+        answersById: new Map(),
+        partnerAnswersById: new Map(),
     },
-    preDialogueQuestions: [
+    preDialogueQuestions: shuffleList([
             {
                 questionId: 'weekendEvents',
                 questionType: 'input',
@@ -157,7 +160,7 @@ const dialogueIcebreakers = {
                 label: "Do you know any languages other than English? When did you learn them?",
                 defaultValue: ''
             },
-        ],
+        ]),
 };
 
 const dialogueTasksById = {

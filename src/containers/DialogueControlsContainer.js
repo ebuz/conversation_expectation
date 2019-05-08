@@ -39,17 +39,20 @@ class DialogueControls extends React.Component {
     }
 
     render() {
-        if(!this.props.ready){
-            return <div>
-                <button onClick={this.props.readyAndNotify}>
-                    Click when ready to start talking
-                </button>
-                </div>;
+        if(this.props.dialogueStartTime === null){
+            if(!this.props.ready){
+                return <div>
+                    <button onClick={this.props.readyAndNotify}>
+                        Click when ready to start your conversation
+                    </button>
+                    </div>;
+            }
+            if(!this.props.partnerReady){
+                return <div><p>Waiting on partner to be ready. <b>Please wait here!</b></p></div>
+            }
+            return <div><p>Starting the conversation</p></div>
         }
-        if(!this.props.partnerReady){
-            return <div><p>Waiting on partner to be ready. Do not leave this page!</p></div>
-        }
-        return <div><p>Dialogue in progress</p></div>
+        return <div><p>You and your partner can hear each other now!</p></div>
     }
 }
 
@@ -71,7 +74,7 @@ const mapDispatchToProps = (dispatch, ownProps) => {
         },
         startDialogue: () => {
             endNotificationTimer();
-            dispatch(handleDialogueStart(ownProps.wrappedTaskAction, ownProps.id, 15 * 1000));
+            dispatch(handleDialogueStart(ownProps.wrappedTaskAction, ownProps.id, ownProps.dialogueTimeLimit));
         },
         dispatchPeerAction: action => dispatch(action),
     };

@@ -17,14 +17,10 @@ class PartnerMatching extends React.Component {
         if(this.props.finished) return;
         // handle peer setup and signaling
         if(prevProps.lastServerMessage !== this.props.lastServerMessage && this.props.lastServerMessage.hasOwnProperty('type')) {
-            switch(this.props.lastServerMessage.type) {
-                case switchboardTypes.CANDIDATE_PEER:
-                    this.props.dispatchAction(initiatePeer(this.props.lastServerMessage.initiator));
-                    break;
-                case switchboardTypes.SIGNAL:
-                    this.props.dispatchAction(acceptSignal(this.props.lastServerMessage.signal));
-                    break;
-            }
+            if(this.props.lastServerMessage.type === switchboardTypes.CANDIDATE_PEER)
+                this.props.dispatchAction(initiatePeer(this.props.lastServerMessage.initiator, this.props.selfStream));
+            if(this.props.lastServerMessage.type === switchboardTypes.SIGNAL)
+                this.props.dispatchAction(acceptSignal(this.props.lastServerMessage.signal));
         }
         if(this.props.candidatePeer && this.props.selfSignalData && prevProps.selfSignalData !== this.props.selfSignalData) {
             this.props.dispatchAction(sendSignal(this.props.selfSignalData, this.props.candidatePeer));

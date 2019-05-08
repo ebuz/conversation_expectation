@@ -21,7 +21,7 @@ let dialogueTimer = {
     currentTime: null
 };
 
-export const actionCountDown = (action, waitTime = 10 * 1000) => (dispatch, getState) => {
+export const actionCountDown = (action, waitTime = 15 * 1000) => (dispatch, getState) => {
     setTimeout(() => {
         dispatch(action);
     }, waitTime);
@@ -44,7 +44,7 @@ export const dialogueTime = (id, time) => ({
 
 const dialogueFileName = (id, name) => ({
     type: types.DIALOGUE_FILE_NAME,
-    name
+    name, id
 });
 
 export const handleDialogueStart = (taskWrapper, id, dialogueTimeLimit) =>
@@ -169,6 +169,17 @@ export const taskAction = (id, action) => ({
     id: id,
     action: action
 });
+
+const stopMic = () => (dispatch, getState) => {
+    getState().micData.recorder.destroy();
+    getState().micData.micInput.getTracks().forEach(t => {
+        t.stop();
+    });
+    dispatch({
+        type: types.GOT_MIC,
+        micInput: null
+    });
+};
 
 export const removePartner = () => (dispatch, getState) => {
     if(getState().peer.isInitialized){

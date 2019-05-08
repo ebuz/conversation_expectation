@@ -63,5 +63,13 @@ export default class AudioRecorder {
         }
         return(this.finishedRecording);
     }
+    destroy(){
+        if(this.mediaRecorder){
+            this.mediaRecorder = null;
+            this.recordedChunks = [];
+            this.recorderOptions = {};
+            this.finishedRecording = null;
+        }
+    }
 }
 

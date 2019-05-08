@@ -22,7 +22,6 @@ class Dialogue extends React.Component {
             <div className="Dialogue-box">
                 <DialogueTimerContainer {...this.props} />
                 <DialogueControlsContainer {...this.props} />
-                <p>{this.props.instructions}</p>
                 {this.props.id === 'dialogue1' ? <DialogueSurveyDisplayContainer /> : null}
                 {this.props.dialogueStartTime ? <PartnerAudioContainer /> : null}
             </div>

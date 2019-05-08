@@ -132,9 +132,9 @@ router.post('/mturk/externalSubmit',
         } else {
             next('route') //pass request onto multer
         }
-    }, urlencodedParser, saveAssignment);
+    }, urlencodedParser, saveAssignmentToDb);
 
-router.post('/mturk/externalSubmit', assignmentUpload.none(), saveAssignment);
+router.post('/mturk/externalSubmit', assignmentUpload.none(), saveAssignmentToDb);
 
 // router.use(express.static(__dirname + '/build'));
 

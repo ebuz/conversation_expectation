@@ -14,8 +14,8 @@ const taskToContainer = new Map([
     ['findPartner', PreDialogueContainer],
     ['dialogueIcebreakers', PreDialogueContainer],
     ['dialogue1', ConversationContainer],
-    ['dialogue2', null],
-    ['dialogue3', null],
+    ['dialogue2', ConversationContainer],
+    ['dialogue3', ConversationContainer],
     ['potentialTopics', TopicsSelectContainer],
     ['dialogueBreak', DialogueBreakContainer],
     ['icebreakersRecall', IceBreakerRecallContainer],
@@ -47,16 +47,6 @@ class Dialogue extends React.Component {
         if(this.props.currentTask){
             return(
                 <div className="Dialogue-box">
-                    <p>
-                        {this.props.currentTask} has {this.props.dialogueTasksById[this.props.currentTask].started ? 'started' : 'not started'}
-                        <br/>
-                        {this.props.currentTask} has {this.props.dialogueTasksById[this.props.currentTask].finished ? 'finished' : 'not finished'}
-                    </p>
-                    <button type='button' onClick={this.props.onAction(this.props.id)(finishTask(this.props.currentTask))}
-                        className="Consent-button"
-                    >
-                            finish task
-                    </button>
                     {this.props.currentContainer ? <this.props.currentContainer dispatchAction={this.props.onAction(this.props.id)} wrappedTaskAction={this.props.wrapTaskAction(this.props.id)} {...this.props.dialogueTasksById[this.props.currentTask]}/>: null}
                 </div>
             )
