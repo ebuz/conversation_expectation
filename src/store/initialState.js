@@ -108,7 +108,7 @@ const potentialTopics = {
         questionId: 'topicsQuestion',
         questionType: 'checkBoxes',
         label: 'Which of these topics would you consider talking about with your partner? Your answers will not be shared with them.',
-        options: shuffleList(['TV shows', 'Music', 'Vacation plans', 'Book', 'Hobbies', 'Work', 'Health', 'Pets', 'Children', 'Religion', 'Government', 'Money']),
+        options: shuffleList(['TV shows', 'Music', 'Vacation plans', 'Books', 'Hobbies', 'Work', 'Health', 'Pets', 'Children', 'Religion', 'Government', 'Money']),
         defaultValue: []
     },
     data: {answersById: new Map()},

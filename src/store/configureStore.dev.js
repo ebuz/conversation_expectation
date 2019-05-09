@@ -1,4 +1,4 @@
-import {createStore, applyMiddleware} from 'redux';
+import { createStore, applyMiddleware } from 'redux';
 import thunk from 'redux-thunk';
 import websocket from '@giantmachines/redux-websocket';
 import { middleware as rpcMiddleWare } from '@ebuz/redux-peer-connection';

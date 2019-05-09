@@ -62,8 +62,6 @@ export const handleDialogueStart = (taskWrapper, id, dialogueTimeLimit) =>
             dialogueTimer.tickTimer = null;
             dispatch(taskWrapper(endDialogue(id)));
             dispatch(stopRecording());
-            // dispatch(uploadRecording());
-            // dispatch(saveDialogueFileName());
             dispatch(taskWrapper(finishTask(id)));
         }, dialogueTimeLimit);
         dialogueTimer.tickTimer = setInterval(() => {
