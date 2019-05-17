@@ -21,7 +21,7 @@ export default ReduxQuerySync.enhancer({
         turkSubmitTo: {
             selector: state => state.mturkData.turkSubmitTo,
             action: value => ({type: types.MTURKSUBMITTO, turkSubmitTo: value}),
-            defaultValue: ''
+            defaultValue: process.env.PUBLIC_URL || ''
         },
     },
     initialTruth: 'location',

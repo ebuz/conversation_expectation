@@ -11,7 +11,23 @@ let router = express.Router();
 
 let server = require('http').createServer(app);
 
-const db = require('./db.js');
+let pool = null;
+
+try {
+    pool = require('./db.js').poolFactory();
+    process.on('beforeExit', () => {
+        try{
+            pool.end();
+            console.log('successfully shutdown postgresql pool')
+        }
+        catch(error){
+            console.log('postgresql pool failed to shutdown')
+        }
+    });
+} catch(error) {
+    pool = null;
+    console.log('Could not connect to database');
+}
 
 router.use(function(req, res, next) {
   console.log('%s %s %s', req.method, req.url, req.path);
@@ -62,27 +78,6 @@ router.post('/recording/:speakerid', recordingUpload.single('recording'),
 
 const urlencodedParser = bodyParser.urlencoded({ extended: true })
 
-const saveAssignment = (req, res) => {
-    if (!req.body) {
-        console.log(`req has no body, sending 400`)
-        return res.sendStatus(400)
-    }
-    if (!req.body.assignmentId || !req.body.data) {
-        console.log('no assignmentId or no data, sending 400')
-        return res.sendStatus(400)
-    }
-    console.log('saving assignment')
-    fs.writeFile(
-        path.join(assignmentDestination, `${req.body.assignmentId}.json`),
-        req.body.data, (err) => {
-            if (err) {
-                console.log('problem with saving file, sending 500')
-                res.sendStatus(500);
-            }
-            res.sendStatus(200);
-        });
-};
-
 const commitToDb = async (pool, insertFrame, insertValues) => {
     const client = await pool.connect()
     try {
@@ -101,28 +96,50 @@ const commitToDb = async (pool, insertFrame, insertValues) => {
     }
 }
 
-const saveAssignmentToDb = (req, res) => {
-    if (!req.body) {
-        console.log(`req has no body, sending 400`)
-        return res.sendStatus(400)
-    }
-    if (!req.body.data) {
-        console.log('no data, sending 400')
-        return res.sendStatus(400)
-    }
+const saveAssignmentToDb = pool => (req, res) => {
     console.log('saving assignment to db')
-    commitToDb(db.pool,
+    commitToDb(pool,
         'INSERT INTO assignments(assignmentId, data, datab) VALUES($1, $2, $3);',
         [req.body.assignmentId, req.body.data, req.body.data])
         .then(dbResponse => {
             res.sendStatus(200);
         })
         .catch(e => {
-            // save to disk as fall back?
-            // will need to disable early fail if db isn't available
             console.log(e);
-            res.sendStatus(500);
-        })
+            console.log('saving to file as fallback');
+            saveAssignmentToFile(req, res);
+            res.sendStatus(200);
+        });
+};
+
+const saveAssignmentToFile = (req, res) => {
+    console.log('saving assignment to file')
+    fs.writeFile(
+        path.join(assignmentDestination, `${req.body.assignmentId}.json`),
+        req.body.data, (err) => {
+            if (err) {
+                console.log('problem with saving file, sending 500')
+                res.sendStatus(500);
+            }
+            res.sendStatus(200);
+        });
+};
+
+
+const saveAssignment = (req, res) => {
+    if (!req.body) {
+        console.log(`req has no body, sending 400`)
+        return res.sendStatus(400)
+    }
+    if (!req.body.assignmentId || !req.body.data) {
+        console.log('no assignmentId or no data, sending 400')
+        return res.sendStatus(400)
+    }
+    if(pool) {
+        saveAssignmentToDb(pool)(req, res);
+    } else {
+        saveAssignmentToFile(req, res);
+    }
 };
 
 router.post('/mturk/externalSubmit',
@@ -144,17 +161,17 @@ router.get('/*', function (req, res) {
     // res.sendFile(path.join(__dirname, './build', 'index.html'));
 });
 
-app.use('/ce', router);
+app.use('/', router);
 
-const serverDBStartup = () => {
-    commitToDb(db.pool,
+const serverDBStartup = pool => {
+    commitToDb(pool,
         'CREATE TABLE IF NOT EXISTS assignments ( \
             id serial PRIMARY KEY NOT NULL, \
             assignmentId text, \
             data json NOT NULL, \
             datab jsonb NOT NULL);')
         .then(async (dbResponse) => {
-            const { rows } = await db.pool.query('SELECT NOW()');
+            const { rows } = await pool.query('SELECT NOW()');
             console.log(rows);
         })
         .catch(err => {
@@ -166,6 +183,6 @@ const serverDBStartup = () => {
 
 const serverPort = process.env.PORT || 6969;
 server.listen(serverPort, () => {
-    serverDBStartup();
+    if(pool) serverDBStartup(pool);
     console.log('listening on port ' + serverPort)
 });

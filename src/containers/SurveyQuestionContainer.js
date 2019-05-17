@@ -12,7 +12,7 @@ const SurveyQuestion = ({questionId, question, answer, handleOnChange, handleOnC
         case 'checkBoxes':
             questionDiv =
                 <div className="CheckBoxQuestion-box">
-                    <label htmlFor={questionId}>{label}</label><br />
+                    <label htmlFor={questionId}>{label}</label><br /><br />
                     <div className="CheckBoxQuestionOptions-box">
                         {subparts.options.map((item, index) => {
                             return (

@@ -7,9 +7,13 @@ class MturkSubmit extends React.Component {
         form.append('assignmentId', this.props.assignmentId);
         form.append('data', this.props.experimentalData);
         let postURL = process.env.PUBLIC_URL;
-        if(postURL === '' || postURL === null)
-            postURL = window.location.origin.toString() + window.location.pathname.toString();
-        fetch(new URL('/mturk/externalSubmit', postURL),
+        if(postURL === null)
+            postURL = '/';
+        if(postURL.endsWith('/'))
+            postURL = `${postURL}mturk/externalSubmit`;
+        else
+            postURL = `${postURL}/mturk/externalSubmit`;
+        fetch(postURL,
             {
             method: 'POST',
             body: form
@@ -21,14 +25,11 @@ class MturkSubmit extends React.Component {
     };
 
     render() {
-        let adjustTurkSubmit = this.props.turkSubmitTo;
-        if(this.props.turkSubmitTo === '' || this.props.turkSubmitTo === null)
-            adjustTurkSubmit = window.location.origin.toString() + window.location.pathname.toString();
-        const turkSubmitToURL = new URL('mturk/externalSubmit', adjustTurkSubmit);
+        let adjustTurkSubmit = this.props.turkSubmitTo.endsWith('/') ? `${this.props.turkSubmitTo}mturk/externalSubmit` : `${this.props.turkSubmitTo}/mturk/externalSubmit`;
         return <div className="MturkSubmit-box">
             <p>Thank you for participating in this study, your conversation will directly contribute to our understanding of human interaction. If after the study you have any questions about the study or our findings, do not hesitate to contact us.</p>
             <p>We know that MTurkers like to share their experiences with other MTurkers about the HITs and requesters they have work with. If you plan to share your experience, we request that you not divulge too many details about this study. We want to better understand how people converse based on their expectations about the conversation and their partners. Sharing too many details about our studies with others who may participate in the future may affect the expectations they have in ways that would influence the usefulness of the data we collect. Thank you for your understanding.</p>
-            <form action={turkSubmitToURL} method='post'>
+            <form action={adjustTurkSubmit} method='post'>
                     <input type='hidden' id='assignmentId' name='assignmentId' value={this.props.assignmentId} />
                     <input type='hidden' id='data' name='data' value={this.props.experimentalData} />
                     <label htmlFor='comment'>
@@ -62,7 +63,7 @@ const extractDialogueData = dialogue => {
 
 const mapStateToProps = (state) => {
     return {
-        turkSubmitTo: state.mturkData.turkSubmitTo,
+        turkSubmitTo: state.mturkData.turkSubmitTo || '/',
         assignmentId: state.mturkData.assignmentId,
         experimentalData: JSON.stringify({
             ...state.mturkData,

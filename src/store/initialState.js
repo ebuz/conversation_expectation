@@ -53,8 +53,8 @@ const experimentTasksFrame = {
 };
 
 const introductionByCondition = {
-    longConversation: <p>In this task you will be completing a few questionnaires as well as having a series of conversations with another mechanical-turker. Overall, you will speak with your partner <b>three times for a total of 15 minutes</b>.</p>,
-    shortConversation: <p>In this task you will be completing a few questionnaires as well as having a conversation with another mechanical-turker. You will speak with your partner <b>once for a total of 5 minutes</b>.</p>,
+    longConversation: <div><p>In this task you will be completing a few questionnaires as well as having a series of conversations with another mechanical-turker.</p><p>Overall, you will speak with your partner <b>three times for a total of 15 minutes</b>.</p></div>,
+    shortConversation: <div><p>In this task you will be completing a few questionnaires as well as having a conversation with another mechanical-turker.</p><p>You will speak with your partner <b>once for a total of 5 minutes</b>.</p></div>,
 }
 
 const introduction = {
@@ -110,6 +110,18 @@ const potentialTopics = {
         label: 'Which of these topics would you consider talking about with your partner? Your answers will not be shared with them.',
         options: shuffleList(['TV shows', 'Music', 'Vacation plans', 'Books', 'Hobbies', 'Work', 'Health', 'Pets', 'Children', 'Religion', 'Government', 'Money']),
         defaultValue: []
+    },
+    data: {answersById: new Map()},
+};
+
+const potentialTopicsRecall = {
+    ...experimentTasksFrame,
+    id: 'potentialTopicsRecall',
+    topicsQuestion: {
+        ...potentialTopics.topicsQuestion,
+        questionId: 'topicsQuestionRecall',
+        questionType: 'checkBoxes',
+        label: 'Which of these topics did you talk about with your partner? Your answers will not be shared.',
     },
     data: {answersById: new Map()},
 };
@@ -173,11 +185,11 @@ const dialogueTasksById = {
     'potentialTopics': {...potentialTopics, finished: false},
     'dialogueIcebreakers': {...dialogueIcebreakers, finished: false},
     'findPartner': {...experimentTasksFrame, id: 'findPartner', finished: false},
-    //partly tested
     'dialogue1': {...dialogue1, finished: false},
-    //untested
     'dialogue2': {...dialogue1, id: 'dialogue2', finished: false},
     'dialogue3': {...dialogue1, id: 'dialogue3', finished: false},
+    //untested
+    'potentialTopicsRecall': {...potentialTopicsRecall, finished: false},
 };
 
 const dialogueConditionsById = {
@@ -193,7 +205,7 @@ const dialogueConditionsById = {
         studyIdCode: '2f42167b-e18d-493c-8a66-0dc0cf3b1e86',
         dialogueTasks: ['findPartner', 'dialogueIcebreakers',
             'dialogue1', 'icebreakersRecall', 'dialogue1Recall',
-            'potentialTopics', 'dialogue2', 'dialogueBreak',
+            'potentialTopics', 'dialogue2', 'potentialTopicsRecall',
             'dialogue3', 'removePartner'
         ],
     }

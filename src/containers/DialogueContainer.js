@@ -17,6 +17,7 @@ const taskToContainer = new Map([
     ['dialogue2', ConversationContainer],
     ['dialogue3', ConversationContainer],
     ['potentialTopics', TopicsSelectContainer],
+    ['potentialTopicsRecall', TopicsSelectContainer],
     ['dialogueBreak', DialogueBreakContainer],
     ['icebreakersRecall', IceBreakerRecallContainer],
     ['dialogue1Recall', RecallContainer],

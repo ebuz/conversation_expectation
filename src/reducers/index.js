@@ -40,6 +40,7 @@ const dialogueTaskAction = (state = {}, action) => {
                 }};
             }
         case 'potentialTopics':
+        case 'potentialTopicsRecall':
         case 'icebreakersRecall':
             if(action.type === types.QUESTION_ANSWER){
                 return {...state,

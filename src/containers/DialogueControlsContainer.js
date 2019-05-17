@@ -50,7 +50,7 @@ class DialogueControls extends React.Component {
             if(!this.props.partnerReady){
                 return <div><p>Waiting on partner to be ready. <b>Please wait here!</b></p></div>
             }
-            return <div><p>Starting the conversation</p></div>
+            return <div><p>Starting the conversation...</p></div>
         }
         return <div><p>You and your partner can hear each other now!</p></div>
     }
