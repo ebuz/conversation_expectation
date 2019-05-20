@@ -27,6 +27,7 @@ try {
 } catch(error) {
     pool = null;
     console.log('Could not connect to database');
+    console.log(error);
 }
 
 router.use(function(req, res, next) {
@@ -161,7 +162,7 @@ router.get('/*', function (req, res) {
     // res.sendFile(path.join(__dirname, './build', 'index.html'));
 });
 
-app.use('/', router);
+app.use('/ce', router);
 
 const serverDBStartup = pool => {
     commitToDb(pool,

@@ -1,7 +1,7 @@
 require('dotenv').config()
 const { Pool } = require('pg')
 
-const poolFactory(config) => {
+const poolFactory = config => {
     if(config){
         return new Pool(config);
     }
