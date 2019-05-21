@@ -31,6 +31,7 @@ export const switchboardData = {
         ignoreSignals: false,
         unreachable: [] },
     selfSignalData: []
+    peerData: []
 };
 
 export const mturkData = {
