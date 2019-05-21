@@ -23,6 +23,11 @@ export default ReduxQuerySync.enhancer({
             action: value => ({type: types.MTURKSUBMITTO, turkSubmitTo: value}),
             defaultValue: process.env.PUBLIC_URL || ''
         },
+        webrtcIgnoreSignals: {
+            selector: state => state.switchboardData.peeringConstraints.ignoreSignals,
+            action: value => ({type: types.PEER_CONSTRAINT, constraint: {ignoreSignals: value === 'true'}}),
+            defaultValue: false
+        },
     },
     initialTruth: 'location',
     replaceState: true

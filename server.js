@@ -11,10 +11,8 @@ let router = express.Router();
 
 let server = require('http').createServer(app);
 
-let pool = null;
-
 try {
-    pool = require('./db.js').poolFactory();
+    var pool = require('./db.js').poolFactory();
     process.on('beforeExit', () => {
         try{
             pool.end();
@@ -25,7 +23,7 @@ try {
         }
     });
 } catch(error) {
-    pool = null;
+    var pool = null;
     console.log('Could not connect to database');
     console.log(error);
 }
@@ -177,8 +175,7 @@ const serverDBStartup = pool => {
         })
         .catch(err => {
             console.log(err);
-            console.log('issues connecting to database, exiting!');
-            process.exit(-1);
+            console.log('Could not connect to db.');
         });
 };
 

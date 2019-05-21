@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 import * as switchboardTypes from '../actionTypes/switchboardTypes';
 import { finishTask, restartTask, requestPeer, initiatePeer, sendSignal, acceptSignal, peered, peeringFailed } from '../actions';
 
-const peerSignalingWaitTime = 1 * 60 * 1000; //one minute in ms
+const peerSignalingWaitTime = 1.5 * 60 * 1000; //1.5 minutes in ms
 
 class PartnerMatching extends React.Component {
     constructor(props) {
@@ -14,6 +14,7 @@ class PartnerMatching extends React.Component {
         };
     }
     signalingTimer(){
+        clearTimeout(this.state.peerSignalingTimer);
         this.setState({ ...this.state,
             peerSignalingTimer: setTimeout(() => {
                 this.signalingTimeUp();
@@ -53,7 +54,7 @@ class PartnerMatching extends React.Component {
                 this.props.dispatchAction(initiatePeer(this.props.lastServerMessage.initiator, this.props.selfStream));
                 this.signalingTimer();
             }
-            if(this.props.lastServerMessage.type === switchboardTypes.SIGNAL)
+            if(this.props.lastServerMessage.type === switchboardTypes.SIGNAL && !this.props.peeringConstraints.ignoreSignals)
                 this.props.dispatchAction(acceptSignal(this.props.lastServerMessage.signal));
         }
         if(this.props.candidatePeer && this.props.selfSignalData && prevProps.selfSignalData !== this.props.selfSignalData) {

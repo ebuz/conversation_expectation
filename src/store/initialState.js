@@ -27,7 +27,9 @@ export const switchboardData = {
     selfId: null,
     serverId: null,
     candidatePeer: null,
-    peeringConstraints: { unreachable: [] },
+    peeringConstraints: {
+        ignoreSignals: false,
+        unreachable: [] },
     selfSignalData: []
 };
 

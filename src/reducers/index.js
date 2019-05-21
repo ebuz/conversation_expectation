@@ -183,11 +183,19 @@ const switchboardData = (state = defaults.switchboardData, action) => {
         case types.SELFID:
             return {...state, selfId: action.selfId}
         case types.PEER_CONSTRAINT:
-            return {...state,
-                peeringConstraints: {...state.peeringConstraints,
-                    unreachable: [...state.peeringConstraints.unreachable,
-                        ...action.constraint.unreachable
-                    ]
+            if(action.constraint.hasOwnProperty('unreachable')){
+                return {...state,
+                    peeringConstraints: {...state.peeringConstraints,
+                        unreachable: [...state.peeringConstraints.unreachable,
+                            ...action.constraint.unreachable
+                        ]
+                    }
+                }
+            }else{
+                return {...state,
+                    peeringConstraints: {...state.peeringConstraints,
+                        ...action.constraint
+                    }
                 }
             }
         case types.WEBSOCKET_CONNECTING:
