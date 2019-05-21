@@ -5,7 +5,7 @@ import { actions as rpcActions } from '@ebuz/redux-peer-connection';
 
 import { connectToSwitchboard, destroyPeer } from './switchboardPeering';
 
-export { connectToSwitchboard, requestPeer, candidatePeer, peering, sendSignal, acceptSignal, initiatePeer, peered, peeringFailed, initiateDialogue, partnerPredialogueAnswers, shareAnswers } from './switchboardPeering';
+export { connectToSwitchboard, peeringConstraint, requestPeer, candidatePeer, peering, switchInitiator, sendSignal, acceptSignal, initiatePeer, peered, peeringFailed, destroyPeer, initiateDialogue, partnerPredialogueAnswers, shareAnswers } from './switchboardPeering';
 
 export { MediaRecorder, getUserMedia } from './AudioRecorder';
 

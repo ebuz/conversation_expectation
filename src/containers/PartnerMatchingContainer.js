@@ -2,9 +2,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import * as switchboardTypes from '../actionTypes/switchboardTypes';
-import { finishTask, restartTask, requestPeer, initiatePeer, sendSignal, acceptSignal, peered, peeringFailed } from '../actions';
+import { finishTask, restartTask, requestPeer, initiatePeer, switchInitiator, sendSignal, acceptSignal, peered, peeringConstraint, destroyPeer, peeringFailed } from '../actions';
 
-const peerSignalingWaitTime = 1.5 * 60 * 1000; //1.5 minutes in ms
+const peerSignalingWaitTime = 2 * 60 * 1000; //2 minutes in ms
 
 class PartnerMatching extends React.Component {
     constructor(props) {
@@ -28,7 +28,10 @@ class PartnerMatching extends React.Component {
         });
     }
     signalingTimeUp(){
-        this.props.dispatchAction(peeringFailed(this.props.candidatePeer));
+        //first try switching who initiates but save candidate peer as unreachable
+        this.props.dispatchAction(peeringConstraint({unreachable: [this.props.candidatePeer]}));
+        this.props.dispatchAction(switchInitiator(this.props.candidatePeer));
+        this.props.dispatchAction(destroyPeer());
         this.props.dispatchTaskAction(restartTask(this.props.id))();
         this.setState({ ...this.state,
             peerSignalingTimer: null
@@ -51,8 +54,23 @@ class PartnerMatching extends React.Component {
         // handle peer setup and signaling
         if(prevProps.lastServerMessage !== this.props.lastServerMessage && this.props.lastServerMessage.hasOwnProperty('type')) {
             if(this.props.lastServerMessage.type === switchboardTypes.CANDIDATE_PEER){
-                this.props.dispatchAction(initiatePeer(this.props.lastServerMessage.initiator, this.props.selfStream));
-                this.signalingTimer();
+                if(this.props.lastServerMessage.initiator){
+                    if(this.props.peeringConstraints.unreachable.includes(this.props.candidatePeer)){
+                        this.props.dispatchAction(peeringFailed(this.props.candidatePeer));
+                        this.props.dispatchTaskAction(restartTask(this.props.id))();
+                        this.signalingCancelTimer();
+                    } else {
+                        this.props.dispatchAction(initiatePeer(this.props.lastServerMessage.initiator, this.props.selfStream));
+                        this.signalingTimer();
+                    }
+                } else {
+                    if(this.props.peerInitialized){
+                        this.props.dispatchAction(destroyPeer());
+                        this.props.dispatchAction(initiatePeer(this.props.lastServerMessage.initiator, this.props.selfStream));
+                    } else {
+                        this.props.dispatchAction(initiatePeer(this.props.lastServerMessage.initiator, this.props.selfStream));
+                    }
+                }
             }
             if(this.props.lastServerMessage.type === switchboardTypes.SIGNAL && !this.props.peeringConstraints.ignoreSignals)
                 this.props.dispatchAction(acceptSignal(this.props.lastServerMessage.signal));

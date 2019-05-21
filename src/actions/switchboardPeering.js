@@ -73,6 +73,13 @@ export const sendSignal = (signal, peerId) => {
     })
 };
 
+export const switchInitiator = peerId => {
+    return switchboardSendAction({
+        type: types.PEERING_SWITCH_INITIATOR,
+        receivingPeer: peerId,
+    })
+};
+
 export const peered = () => {
     return switchboardSendAction({
         type: types.PEERED,
@@ -80,7 +87,6 @@ export const peered = () => {
 };
 
 export const destroyPeer = () => (dispatch, getState) => {
-    dispatch(candidatePeer(null));
     dispatch(rpcActions.destroyPeer());
 };
 
@@ -92,11 +98,13 @@ export const partnerPredialogueAnswers = (answers) => {
     });
 };
 
-export const peeringFailed = peerId => (dispatch, getState) => {
-    dispatch({
+export const peeringConstraint = constraint => ({
         type: types.PEER_CONSTRAINT,
-        constraint: {unreachable: [peerId]}
-    });
+        constraint
+});
+
+export const peeringFailed = peerId => (dispatch, getState) => {
+    dispatch(peeringConstraint({unreachable: [peerId]}));
     dispatch(partnerPredialogueAnswers('[]'));
     dispatch(destroyPeer());
     dispatch(switchboardSendAction({
@@ -126,7 +134,14 @@ export const initiatePeer = (initiator, stream) => {
     return rpcActions.createPeer({
         initiator: initiator,
         channelName: 'peerData',
-        stream: stream
+        stream: stream,
+        config: {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' },
+                { urls: 'stun:global.stun.twilio.com:3478?transport=udp' },
+                { urls: 'stun:stun.stunprotocol.org:3478?transport=udp' },
+                { urls: 'stun:stun.services.mozilla.com:3478?transport=udp' },
+            ] },
     });
 };
 
