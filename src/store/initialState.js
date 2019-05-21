@@ -16,7 +16,7 @@ const shuffleList = list => {
 
 export const experimentalData = {
     studyName: 'CE_pilot',
-    dialogueCondition: 'shortConversation',
+    dialogueCondition: 'longConversation',
     data: {},
     debugMode: process.env.NODE_ENV !== 'production'
 };

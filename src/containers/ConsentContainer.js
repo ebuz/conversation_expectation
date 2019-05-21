@@ -3,6 +3,12 @@ import { connect } from 'react-redux';
 
 import { finishTask } from '../actions';
 
+export const openHITWindow = () => {
+    const hitURL = window.location.origin + window.location.pathname + 'hit/' + window.location.search;
+    const strWindowFeatures = "titlebar=yes,location=yes,resizable=yes,scrollbars=yes,status=yes,height=600,width=800";
+    window.open(hitURL, 'HIT_window', strWindowFeatures);
+}
+
 const isInPreview = ({assignmentId, workerId, hitId, turkSubmitTo}) => {
     let result = ['ASSIGNMENT_ID_NOT_AVAILABLE', 'assignment_id_not_available']
                 .indexOf(assignmentId) >= 0
@@ -34,7 +40,12 @@ const mapStateToProps = (state) => {
 
 const mapDispatchToProps = (dispatch, ownProps) => {
     return {
-        onFinished: id => { return () => { dispatch(finishTask(id)) } },
+        onFinished: id => {
+            return () => {
+                dispatch(finishTask(id));
+                openHITWindow();
+            }
+        },
     };
 };
 
