@@ -30,7 +30,8 @@ export const switchboardData = {
     peeringConstraints: {
         ignoreSignals: false,
         unreachable: [] },
-    selfSignalData: []
+    selfSignalData: [],
+    peerData: []
 };
 
 export const mturkData = {

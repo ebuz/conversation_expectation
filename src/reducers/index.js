@@ -220,6 +220,8 @@ const switchboardData = (state = defaults.switchboardData, action) => {
             }
         case rpcActionTypes.default.PEER_SIGNAL:
             return {...state, selfSignalData: [...state.selfSignalData, action.signal]}
+        case rpcActionTypes.default.PEER_DATA:
+            return {...state, peerData: [...state.peerData, action.data.toString()]}
         default:
             return state;
     }

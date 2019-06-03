@@ -71,6 +71,10 @@ const mapStateToProps = (state) => {
             selfId: state.switchboardData.selfId,
             peerId: state.switchboardData.candidatePeerId,
             dialogueData: extractDialogueData(state.experimentTasksById['dialogue']),
+            switchboardMessages: state.switchboardData.messages,
+            selfSignalData: state.switchboardData.selfSignalData,
+            peeringConstraints: state.switchboardData.peeringConstraints,
+            peeringData: state.switchboardData.peeringData,
         })
     }
 };
