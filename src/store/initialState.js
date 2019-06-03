@@ -16,7 +16,7 @@ const shuffleList = list => {
 
 export const experimentalData = {
     studyName: 'CE_pilot',
-    dialogueCondition: 'shortConversation',
+    dialogueCondition: 'longConversationEarlyTopics',
     data: {},
     debugMode: process.env.NODE_ENV !== 'production'
 };
@@ -55,7 +55,8 @@ const experimentTasksFrame = {
 };
 
 const introductionByCondition = {
-    longConversation: <div><p>In this task you will be completing a few questionnaires as well as having a series of conversations with another mechanical-turker.</p><p>Overall, you will speak with your partner <b>three times for a total of 15 minutes</b>.</p></div>,
+    longConversationEarlyTopics: <div><p>In this task you will be completing a few questionnaires as well as having a series of conversations with another mechanical-turker.</p><p>Overall, you will speak with your partner <b>three times for a total of 15 minutes</b>.</p></div>,
+    longConversationLateTopics: <div><p>In this task you will be completing a few questionnaires as well as having a series of conversations with another mechanical-turker.</p><p>Overall, you will speak with your partner <b>three times for a total of 15 minutes</b>.</p></div>,
     shortConversation: <div><p>In this task you will be completing a few questionnaires as well as having a conversation with another mechanical-turker.</p><p>You will speak with your partner <b>once for a total of 5 minutes</b>.</p></div>,
 }
 
@@ -202,19 +203,29 @@ const dialogueConditionsById = {
             'dialogue1', 'removePartner', 'icebreakersRecall', 'dialogue1Recall'
         ],
     },
-    longConversation: {
-        dialogueCondition: 'longConversation',
+    longConversationEarlyTopics: {
+        dialogueCondition: 'longConversationEarlyTopics',
         studyIdCode: '2f42167b-e18d-493c-8a66-0dc0cf3b1e86',
         dialogueTasks: ['findPartner', 'dialogueIcebreakers',
             'dialogue1', 'icebreakersRecall', 'dialogue1Recall',
             'potentialTopics', 'dialogue2', 'potentialTopicsRecall',
             'dialogue3', 'removePartner'
         ],
+    },
+    longConversationLateTopics: {
+        dialogueCondition: 'longConversationLateTopics',
+        studyIdCode: '2f42167b-e18d-493c-8a66-0dc0cf3b1e86',
+        dialogueTasks: ['findPartner', 'dialogueIcebreakers',
+            'dialogue1', 'icebreakersRecall', 'dialogue1Recall',
+            'dialogue2', 'potentialTopics', 'dialogue3',
+            'potentialTopicsRecall', 'removePartner'
+        ],
     }
 };
 
 const dialogueInstructionsByCondition = {
-    longConversation: <p>After we match you with a partner you will speak to them <b>three times</b>. Each time will last <b>five minutes</b>. Between each conversation and after you will have some questionnaires to complete.</p>,
+    longConversationEarlyTopics: <p>After we match you with a partner you will speak to them <b>three times</b>. Each time will last <b>five minutes</b>. Between each conversation and after you will have some questionnaires to complete.</p>,
+    longConversationLateTopics: <p>After we match you with a partner you will speak to them <b>three times</b>. Each time will last <b>five minutes</b>. Between each conversation and after you will have some questionnaires to complete.</p>,
     shortConversation: <p>After we match you with a partner you will speak to them for <b>five minutes</b>. After you speak you have some questionnaires to complete.</p>,
 }
 
