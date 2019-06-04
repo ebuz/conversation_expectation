@@ -30,7 +30,8 @@ export const switchboardData = {
     peeringConstraints: {
         ignoreSignals: false,
         unreachable: [] },
-    selfSignalData: []
+    selfSignalData: [],
+    peerData: []
 };
 
 export const mturkData = {
@@ -88,6 +89,12 @@ const submission = {
     ...experimentTasksFrame,
     id: "submission",
     instructions: "Thank you for participating! Feel free to leave a comment before submitting the HIT."
+};
+
+const error = {
+    ...experimentTasksFrame,
+    id: "error",
+    instructions: "Your partner has gone missing and the task cannot continue."
 };
 
 const dialogue1 = {
@@ -237,7 +244,7 @@ const dialogue = {
     ...dialogueConditionsById[experimentalData.dialogueCondition],
 };
 
-export const experimentTasks = ["introduction", "consent", "micSetup", "micCheck", "dialogue", "wrapUp", "submission"];
+export const experimentTasks = ["introduction", "consent", "micSetup", "micCheck", "dialogue", "wrapUp", "submission", "error"];
 
 export const experimentTasksById = {
     //tested
@@ -248,5 +255,6 @@ export const experimentTasksById = {
     //untested
     "dialogue": dialogue,
     "wrapUp": {started: true, finished: true},
+    "error": {...error, started: true, finished: true},
     "submission": submission
 };

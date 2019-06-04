@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 
-class MturkSubmit extends React.Component {
+class Error extends React.Component {
     componentDidMount() {
         let form = new FormData();
         form.append('assignmentId', this.props.assignmentId);
@@ -26,10 +26,10 @@ class MturkSubmit extends React.Component {
 
     render() {
         let adjustTurkSubmit = this.props.turkSubmitTo.endsWith('/') ? `${this.props.turkSubmitTo}mturk/externalSubmit` : `${this.props.turkSubmitTo}/mturk/externalSubmit`;
-        let buttonMsg = this.props.recorderState === 'inactive' ? 'Submit data & finish HIT' : 'Submit button disabled while your last recording uploads';
         return <div className="MturkSubmit-box">
-            <p>Thank you for participating in this study, your conversation will directly contribute to our understanding of human interaction. If after the study you have any questions about the study or our findings, do not hesitate to contact us. The HIT submission button below will be disabled while your final recording uploads to our server, uploads can take up to two minutes to finish.</p>
-            <p>We know that MTurkers like to share their experiences with other MTurkers about the HITs and requesters they have worked with. If you plan to share your experience, we request that you not divulge too many details about this study. We want to better understand how people converse based on their expectations about the conversation and their partners. Sharing too many details about our studies with others who may participate in the future may affect the expectations they have in ways that would influence the usefulness of the data we collect. Thank you for your understanding.</p>
+            <p>Your partner un-expectedly disconnected. Because of this the study will end now. This was no fault of your own and will not affect whether we approve your submission HIT. Please leave a comment if you feel like you might know why your partner disconnected.</p>
+            <p>Thank you for participating in this study. If after the study you have any questions about the study or our findings, do not hesitate to contact us.</p>
+            <p>We know that MTurkers like to share their experiences with other MTurkers about the HITs and requesters they have work with. If you plan to share your experience, we request that you not divulge too many details about this study. We want to better understand how people converse based on their expectations about the conversation and their partners. Sharing too many details about our studies with others who may participate in the future may affect the expectations they have in ways that would influence the usefulness of the data we collect. Thank you for your understanding.</p>
             <form action={adjustTurkSubmit} method='post'>
                     <input type='hidden' id='assignmentId' name='assignmentId' value={this.props.assignmentId} />
                     <input type='hidden' id='data' name='data' value={this.props.experimentalData} />
@@ -39,8 +39,7 @@ class MturkSubmit extends React.Component {
                         <textarea cols={60} rows={4} id='comment' name='comment' />
                     </label>
                     <br />
-                    <input type='submit' value={buttonMsg}
-                        disabled={this.props.recorderState !== 'inactive'}
+                    <input type='submit' value="Submit data & finish HIT"
                         className="MturkSubmit-button GreenButton CenterButton"
                     />
             </form>
@@ -77,8 +76,8 @@ const mapStateToProps = (state) => {
             selfSignalData: state.switchboardData.selfSignalData,
             peeringConstraints: state.switchboardData.peeringConstraints,
             peeringData: state.switchboardData.peeringData,
-        }),
-        recorderState: state.micData.recordingState
+            errorMsg: 'Partner disconnected mid-study.'
+        })
     }
 };
 
@@ -87,4 +86,4 @@ const mapDispatchToProps = (dispatch, ownProps) => {
     };
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(MturkSubmit)
+export default connect(mapStateToProps, mapDispatchToProps)(Error)

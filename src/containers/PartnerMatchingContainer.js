@@ -2,23 +2,27 @@ import React from 'react';
 import { connect } from 'react-redux';
 
 import * as switchboardTypes from '../actionTypes/switchboardTypes';
-import { finishTask, restartTask, requestPeer, initiatePeer, sendSignal, acceptSignal, peered, peeringFailed } from '../actions';
+import { finishTask, restartTask, requestPeer, initiatePeer, switchInitiator, sendSignal, acceptSignal, peered, peeringConstraint, destroyPeer, peeringFailed } from '../actions';
 
-const peerSignalingWaitTime = 1.5 * 60 * 1000; //1.5 minutes in ms
+const initiatorWaitTime = 2 * 60 * 1000; //2 minutes in ms
+const nonInitiatorWaitTime = 3 * 60 * 1000; //3 minutes in ms
 
 class PartnerMatching extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
             peerSignalingTimer: null,
+            initiator: false,
         };
     }
-    signalingTimer(){
+    signalingTimer(initiator = false){
         clearTimeout(this.state.peerSignalingTimer);
+        const waitTime = initiator ? initiatorWaitTime : nonInitiatorWaitTime;
         this.setState({ ...this.state,
+            initiator: initiator,
             peerSignalingTimer: setTimeout(() => {
-                this.signalingTimeUp();
-            }, peerSignalingWaitTime),
+                this.signalingTimeUp(initiator);
+            }, waitTime),
         });
     }
     signalingCancelTimer(){
@@ -27,11 +31,20 @@ class PartnerMatching extends React.Component {
             peerSignalingTimer: null
         });
     }
-    signalingTimeUp(){
-        this.props.dispatchAction(peeringFailed(this.props.candidatePeer));
-        this.props.dispatchTaskAction(restartTask(this.props.id))();
+    signalingTimeUp(initiator = false){
+        //first try switching who initiates but save candidate peer as unreachable
+        if(initiator){
+            this.props.dispatchAction(peeringConstraint({unreachable: [this.props.candidatePeer]}));
+            this.props.dispatchAction(switchInitiator(this.props.candidatePeer));
+        } else if(!initiator && this.props.peeringConstraints.unreachable.includes(this.props.candidatePeer)){
+            this.props.dispatchAction(peeringFailed(this.props.candidatePeer));
+        } else {
+            this.props.dispatchAction(destroyPeer());
+            this.props.dispatchAction(requestPeer());
+        }
         this.setState({ ...this.state,
-            peerSignalingTimer: null
+            peerSignalingTimer: null,
+            initiator: false
         });
     }
     componentDidMount() {
@@ -42,7 +55,7 @@ class PartnerMatching extends React.Component {
         clearTimeout(this.state.peerSignalingTimer);
     };
     componentDidUpdate(prevProps) {
-        if(this.props.peerError && this.props.peerError !== prevProps.peerError) {
+        if((this.props.peerError && this.props.peerError !== prevProps.peerError) || (this.props.finished && !this.props.peerConnected)) {
             this.props.dispatchAction(peeringFailed(this.props.candidatePeer));
             this.props.dispatchTaskAction(restartTask(this.props.id))();
             this.signalingCancelTimer();
@@ -51,8 +64,24 @@ class PartnerMatching extends React.Component {
         // handle peer setup and signaling
         if(prevProps.lastServerMessage !== this.props.lastServerMessage && this.props.lastServerMessage.hasOwnProperty('type')) {
             if(this.props.lastServerMessage.type === switchboardTypes.CANDIDATE_PEER){
-                this.props.dispatchAction(initiatePeer(this.props.lastServerMessage.initiator, this.props.selfStream));
-                this.signalingTimer();
+                if(this.props.peerInitialized){
+                    this.props.dispatchAction(destroyPeer());
+                    this.signalingCancelTimer();
+                }
+                if(this.props.peeringConstraints.unreachable.includes(this.props.candidatePeer)){
+                    if(this.props.lastServerMessage.initiator){
+                        this.props.dispatchAction(peeringFailed(this.props.candidatePeer));
+                        this.props.dispatchTaskAction(restartTask(this.props.id))();
+                        this.signalingCancelTimer();
+                    } else {
+                        // handle re-peering
+                        this.props.dispatchAction(initiatePeer(this.props.lastServerMessage.initiator, this.props.selfStream));
+                        this.signalingTimer(this.props.lastServerMessage.initiator);
+                    }
+                } else {
+                    this.props.dispatchAction(initiatePeer(this.props.lastServerMessage.initiator, this.props.selfStream));
+                    this.signalingTimer(this.props.lastServerMessage.initiator);
+                }
             }
             if(this.props.lastServerMessage.type === switchboardTypes.SIGNAL && !this.props.peeringConstraints.ignoreSignals)
                 this.props.dispatchAction(acceptSignal(this.props.lastServerMessage.signal));
