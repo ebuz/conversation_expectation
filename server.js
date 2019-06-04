@@ -107,7 +107,6 @@ const saveAssignmentToDb = pool => (req, res) => {
             console.log(e);
             console.log('saving to file as fallback');
             saveAssignmentToFile(req, res);
-            res.sendStatus(200);
         });
 };
 
@@ -115,12 +114,13 @@ const saveAssignmentToFile = (req, res) => {
     console.log('saving assignment to file')
     fs.writeFile(
         path.join(assignmentDestination, `${req.body.assignmentId}.json`),
-        req.body.data, (err) => {
+        JSON.stringify(JSON.parse(req.body.data), null, 2), (err) => {
             if (err) {
                 console.log('problem with saving file, sending 500')
                 res.sendStatus(500);
+            } else {
+                res.sendStatus(200);
             }
-            res.sendStatus(200);
         });
 };
 
