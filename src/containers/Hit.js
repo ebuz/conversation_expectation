@@ -4,6 +4,7 @@ import './App.css';
 
 import SwitchboardStatusContainer from './SwitchboardStatusContainer';
 import ErrorDetailsContainer from './ErrorDetailsContainer';
+import ErrorContainer from './ErrorContainer';
 import IntroductionContainer from './IntroductionContainer';
 import ConsentContainer from './ConsentContainer';
 import MicSetupContainer from './MicSetupContainer';
@@ -19,6 +20,7 @@ const taskToContainer = new Map([
     ["micSetup", <MicSetupContainer />],
     ["micCheck", <MicCheckContainer />],
     ["dialogue", <DialogueContainer />],
+    ["error", <ErrorContainer />],
     ["submission", <MturkSubmitContainer />]
 ]);
 

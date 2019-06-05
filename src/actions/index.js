@@ -23,7 +23,11 @@ let dialogueTimer = {
 
 export const actionCountDown = (action, waitTime = 15 * 1000) => (dispatch, getState) => {
     setTimeout(() => {
-        dispatch(action);
+        try {
+            dispatch(action);
+        } catch(err){
+            console.log(`${err}`)
+        }
     }, waitTime);
 };
 
@@ -315,5 +319,20 @@ export const recordMicTest = (data = {}) =>
             dispatch(uploadTestRecording(blob, state.switchboardData.selfId, micTestFile));
         });
         dispatch(recordingState('recording'));
+};
+
+export const endEarly = () =>
+    (dispatch, getState) => {
+        const state = getState();
+        dispatch(restartTask('error'));
+        if(state.micData.recordingState === 'recording'){
+            dispatch(stopRecording());
+            clearTimeout(dialogueTimer.tickTimer);
+            clearTimeout(dialogueTimer.totalTimer);
+        }
+        state.experimentTasks.forEach(t => {
+            if(t !== 'error')
+            dispatch(finishTask(t));
+        });
 };
 
