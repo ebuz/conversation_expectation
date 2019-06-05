@@ -26,6 +26,7 @@ class Error extends React.Component {
 
     render() {
         let adjustTurkSubmit = this.props.turkSubmitTo.endsWith('/') ? `${this.props.turkSubmitTo}mturk/externalSubmit` : `${this.props.turkSubmitTo}/mturk/externalSubmit`;
+        let buttonMsg = this.props.recorderState === 'inactive' ? 'Submit data & finish HIT' : 'Submit button disabled while your last recording uploads';
         return <div className="MturkSubmit-box">
             <p>Your partner un-expectedly disconnected. Because of this the study will end now. This was no fault of your own and will not affect whether we approve your submission HIT. Please leave a comment if you feel like you might know why your partner disconnected.</p>
             <p>Thank you for participating in this study. If after the study you have any questions about the study or our findings, do not hesitate to contact us.</p>
@@ -39,7 +40,8 @@ class Error extends React.Component {
                         <textarea cols={60} rows={4} id='comment' name='comment' />
                     </label>
                     <br />
-                    <input type='submit' value="Submit data & finish HIT"
+                    <input type='submit' value={buttonMsg}
+                        disabled={this.props.recorderState !== 'inactive'}
                         className="MturkSubmit-button GreenButton CenterButton"
                     />
             </form>
@@ -77,7 +79,8 @@ const mapStateToProps = (state) => {
             peeringConstraints: state.switchboardData.peeringConstraints,
             peeringData: state.switchboardData.peeringData,
             errorMsg: 'Partner disconnected mid-study.'
-        })
+        }),
+        recorderState: state.micData.recordingState
     }
 };
 
