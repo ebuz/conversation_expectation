@@ -231,14 +231,10 @@ const micError = (data = {}) => ({
     type: types.MIC_ERROR
 });
 
+
 const constraints = {
     audio: {
-        echoCancellation: false,
-        googEchoCancellation: false,
-        googAutoGainControl: false,
-        googNoiseSuppression: false,
         googHighpassFilter: false,
-        googTypingNoiseDetection: false
     },
     video: false
 };
